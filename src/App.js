@@ -1,4 +1,3 @@
-// src/App.js
 import React, { useMemo, useState, useEffect } from "react";
 import { db } from "./firebase";
 import {
@@ -8,6 +7,8 @@ import {
   orderBy,
   query,
   Timestamp,
+  updateDoc,
+  doc,
 } from "firebase/firestore";
 import {
   PieChart,
@@ -19,11 +20,11 @@ import {
   List,
   Plus,
   LogOut,
+  Pencil,
 } from "lucide-react";
 import "./App.css";
 
 export default function App() {
-  // ---- Auth (로그인 유지) ----
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     try {
       return typeof window !== "undefined" && localStorage.getItem("auth") === "1";
@@ -34,13 +35,15 @@ export default function App() {
   const [passwordInput, setPasswordInput] = useState("");
   const [passwordError, setPasswordError] = useState(false);
 
-  // ---- UI Modals ----
   const [openCalendar, setOpenCalendar] = useState(false);
   const [openList, setOpenList] = useState(false);
   const [openEom, setOpenEom] = useState(false);
   const [openAdd, setOpenAdd] = useState(false);
 
-  // ---- Firestore tx ----
+  // 수정 모달 상태
+  const [openEdit, setOpenEdit] = useState(false);
+  const [editingTx, setEditingTx] = useState(null);
+
   const [tx, setTx] = useState([]);
 
   async function loadTx() {
@@ -59,13 +62,18 @@ export default function App() {
     await loadTx();
   }
 
-  // 로그인 성공 시 저장
+  async function updateTx(id, updates) {
+    const ref = doc(db, "tx", id);
+    await updateDoc(ref, { ...updates, amount: Number(updates.amount) || 0 });
+    await loadTx();
+  }
+
   const handlePasswordSubmit = (e) => {
     e.preventDefault();
     if (passwordInput === "!0121") {
       setIsAuthenticated(true);
       try {
-        localStorage.setItem("auth", "1"); // 로그인 유지
+        localStorage.setItem("auth", "1");
       } catch {}
       setPasswordError(false);
     } else {
@@ -81,12 +89,10 @@ export default function App() {
     setIsAuthenticated(false);
   };
 
-  // 로그인 후에만 데이터 로드
   useEffect(() => {
     if (isAuthenticated) loadTx().catch(console.error);
   }, [isAuthenticated]);
 
-  // ---- 한도/지출 합산(실제 데이터 기반) ----
   const LIMITS = {
     jiyoung: { livingLimit: 120000, diningLimit: 50000 },
     jiwon: { livingLimit: 120000, diningLimit: 50000 },
@@ -120,44 +126,31 @@ export default function App() {
   if (spent.지원.외식 > LIMITS.jiwon.diningLimit)
     alerts.push("지원의 외식비가 한도를 초과했습니다.");
 
-  // ---- Login Gate ----
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50 flex items-center justify-center p-4">
-        <div className="w-full max-w-sm bg-white rounded-2xl shadow-xl p-8">
-          <div className="flex justify-center mb-6">
-            <svg
-              className="h-12 w-auto"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 566.9 234.9"
-              preserveAspectRatio="xMidYMid meet"
-            >
-              <path
-                d="M565.1,234.9H1.8v-18.8h563.2V234.9z M348.8,167.3h-42.1v26.4h-16v-26.4h-42.1v-13h100.3V167.3z M555.6,193.6h-15.3V93
-                h15.3V193.6z M26.7,180.6H97v12.6H11.4v-32.7h15.3V180.6z M137.2,158.5h52.7v-9.8h15.3v44.5h-83.4v-44.5h15.3V158.5z M413.7,176.9
-                h42.1v13H355.6v-13h42.1V155h16V176.9z M481.9,127.8h29.5V95.6h15.3v90.9h-60.2V95.6h15.3V127.8z M137.2,181h52.7v-10.4h-52.7V181z
-                M481.9,173.7h29.5v-33h-29.5V173.7z M94.8,120.5h13.5v13.7H94.8v32.4H79.5V93h15.3V120.5z M413.6,108.5c0,4.9,1,9.4,2.9,13.5
-                c2,4.1,4.6,7.8,8,10.9c3.4,3.2,7.3,5.8,11.8,7.9c4.5,2,9.3,3.4,14.4,4.2v12.3c-4.4-0.5-8.8-1.4-13.1-2.7c-4.3-1.4-8.4-3-12.3-5.1
-                c-3.9-2-7.5-4.4-10.9-7.1c-3.3-2.8-6.2-5.9-8.8-9.2c-2.6,3.4-5.5,6.5-8.9,9.2c-3.4,2.7-7,5.1-10.9,7.1c-3.8,2-7.9,3.7-12.3,5.1
-                c-4.3,1.3-8.6,2.2-13,2.7V145c5-0.8,9.8-2.1,14.3-4.2c4.5-2.1,8.4-4.7,11.8-7.9c3.4-3.2,6.1-6.8,8-10.9c2-4.1,3-8.6,3-13.5V92.9
-                h15.8V108.5z M44,113.2c3.6,0,6.9,0.4,9.9,1.3c3.1,0.8,5.7,2.1,7.9,3.8c2.3,1.7,4,3.9,5.2,6.5c1.3,2.6,1.9,5.7,1.9,9.1
-                c0,3.5-0.6,6.6-1.9,9.2c-1.2,2.6-2.9,4.7-5.2,6.4c-2.2,1.7-4.8,3-7.9,3.9c-3,0.8-6.3,1.2-9.9,1.2H31.8c-3.6,0-7-0.4-10-1.2
-                c-3-0.9-5.6-2.2-7.9-3.9c-2.2-1.7-3.9-3.9-5.2-6.4c-1.2-2.6-1.8-5.7-1.8-9.2c0-3.5,0.6-6.5,1.8-9.1c1.3-2.6,3-4.8,5.2-6.5
-                c2.3-1.7,4.9-3,7.9-3.8c3.1-0.9,6.4-1.3,10-1.3H44z M205.2,145.3h-15.3V93h15.3V145.3z M176.4,106.3h-22.6v1.8c0,2.9,0.5,5.5,1.6,8
-                c1.1,2.5,2.7,4.7,4.7,6.6c2,2,4.5,3.6,7.3,5.1c2.9,1.4,6.1,2.5,9.6,3.3v12.3c-6.3-1.1-12.2-3.1-17.7-5.9
-                c-5.4-2.8-9.9-6.2-13.5-10.1c-3.8,4.5-8.4,8.1-13.9,10.9c-5.5,2.8-11.6,4.8-18.5,6V132c3.5-0.5,6.8-1.5,9.8-3
-                c3-1.5,5.6-3.3,7.8-5.4c2.2-2.1,3.9-4.5,5.1-7.1c1.2-2.6,1.8-5.4,1.8-8.3v-1.8H114V94.2h62.4V106.3z M340.9,108h-68.6v22.9h70.3
-                v12.8H257V95.2h83.9V108z M33.9,125.4c-3.6,0-6.5,0.8-8.6,2.3c-2.1,1.5-3.2,3.6-3.2,6.4c0,2.8,1.1,4.9,3.2,6.4
-                c2.1,1.5,5,2.2,8.6,2.2h7.9c3.8,0,6.6-0.7,8.7-2.2c2-1.5,3-3.6,3-6.4c0-2.8-1-4.9-3-6.4c-2-1.5-4.9-2.3-8.7-2.3H33.9z M46,98.1
-                h25.1v11.6H4.7V98.1h25.1v-8.2H46V98.1z M285.3,0.4l281.6,56.3l-3.7,18.4l-279.8-56L3.7,75.1L0,56.7L281.6,0.4l1.8-0.4L285.3,0.4z"
-                fill="currentColor"
-              />
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-sky-50 flex items-center justify-center p-4">
+        <div className="w-full max-w-sm bg-white rounded-3xl shadow-2xl p-8 border-2 border-sky-100">
+          <div className="flex justify-center mb-8">
+            <svg className="h-10 w-auto" viewBox="0 0 212.429 32.202" xmlns="http://www.w3.org/2000/svg">
+              <path fill="#189EFF" d="m14.951,15.9h-4.229v15.791h-6.492v-15.791H0v-5.579h4.229V3.976h6.492v6.346h4.229v5.579Z"/>
+              <path fill="#189EFF" d="m51.489,10.321l-7.148,21.37h-6.527l-3.866-12.217-3.829,12.217h-6.491l-7.147-21.37h6.855l3.793,13.748,3.72-13.748h6.638l3.756,13.821,3.793-13.821h6.455Z"/>
+              <path fill="#189EFF" d="m61.657,3.976c0,2.297-1.678,3.975-3.975,3.975s-3.976-1.678-3.976-3.975,1.678-3.976,3.976-3.976,3.975,1.678,3.975,3.976Zm-.729,27.789h-6.491V10.321h6.491v21.443Z"/>
+              <path fill="#189EFF" d="m65.812,10.321h6.491v2.188c1.276-1.714,3.246-2.698,5.981-2.698,4.959,0,8.351,3.61,8.351,9.518v12.363h-6.491v-11.269c0-3.246-1.312-5.033-3.756-5.033-2.553,0-4.085,2.006-4.085,5.324v10.978h-6.491V10.321Z"/>
+              <path fill="#189EFF" d="m123.283,10.321l-7.148,21.37h-6.527l-3.866-12.217-3.829,12.217h-6.491l-7.147-21.37h6.855l3.793,13.748,3.72-13.748h6.638l3.756,13.821,3.793-13.821h6.455Z"/>
+              <path fill="#189EFF" d="m124.188,21.006c0-6.491,4.267-11.195,10.394-11.195,2.808,0,4.85.984,6.126,2.698v-2.188h6.492v21.37h-6.492v-2.188c-1.276,1.714-3.318,2.699-6.126,2.699-6.127,0-10.394-4.705-10.394-11.196Zm16.629,0c0-3.282-2.042-5.652-5.215-5.652-3.1,0-5.068,2.37-5.068,5.652s1.969,5.653,5.068,5.653c3.173,0,5.215-2.371,5.215-5.653Z"/>
+              <path fill="#189EFF" d="m158.573,31.691h-6.491V1.058h6.491v30.634Z"/>
+              <path fill="#189EFF" d="m169.949,31.691h-6.491V1.058h6.491v30.634Z"/>
+              <path fill="#189EFF" d="m173.74,21.006c0-6.491,4.595-11.195,11.123-11.195s11.122,4.668,11.122,11.195c0,.62-.036,1.313-.146,2.079h-15.645c.51,2.479,2.225,3.902,4.668,3.902,1.859,0,3.392-.657,3.938-1.678h6.527c-1.094,4.084-5.288,6.893-10.466,6.893-6.528,0-11.123-4.668-11.123-11.196Zm15.9-2.115c-.548-2.553-2.225-3.938-4.777-3.938s-4.158,1.386-4.705,3.938h9.482Z"/>
+              <path fill="#189EFF" d="m212.429,15.9h-4.229v15.791h-6.492v-15.791h-4.23v-5.579h4.23V3.976h6.492v6.346h4.229v5.579Z"/>
             </svg>
           </div>
 
-          <h2 className="text-xl font-semibold text-center text-gray-800 mb-6">
-            비밀번호를 입력하세요
+          <h2 className="text-xl font-bold text-center text-gray-800 mb-2">
+            🔐 환영합니다!
           </h2>
+          <p className="text-sm text-center text-gray-500 mb-6">
+            비밀번호를 입력해주세요
+          </p>
 
           <form onSubmit={handlePasswordSubmit} className="space-y-4">
             <div>
@@ -165,16 +158,17 @@ export default function App() {
                 type="password"
                 value={passwordInput}
                 onChange={(e) => setPasswordInput(e.target.value)}
-                placeholder="비밀번호"
-                className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:ring-2 transition ${
+                placeholder="••••••"
+                className={`w-full px-4 py-3 border-2 rounded-2xl focus:outline-none focus:ring-2 transition shadow-sm ${
                   passwordError
                     ? "border-red-300 focus:border-red-500 focus:ring-red-200"
-                    : "border-gray-300 focus:border-blue-500 focus:ring-blue-200"
+                    : "border-sky-200 focus:border-sky-400 focus:ring-sky-200"
                 }`}
                 autoFocus
               />
               {passwordError && (
-                <p className="text-red-500 text-sm mt-2">
+                <p className="text-red-500 text-sm mt-2 flex items-center gap-1">
+                  <AlertCircle className="w-4 h-4" />
                   비밀번호가 올바르지 않습니다
                 </p>
               )}
@@ -182,7 +176,7 @@ export default function App() {
 
             <button
               type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-lg transition"
+              className="w-full bg-gradient-to-r from-sky-400 to-blue-500 hover:from-sky-500 hover:to-blue-600 text-white font-bold py-3 rounded-2xl transition shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
             >
               확인
             </button>
@@ -192,95 +186,79 @@ export default function App() {
     );
   }
 
-  // ---- Main App ----
   return (
-    <div className="min-h-screen bg-white text-gray-900 flex items-start justify-center p-4 pt-8">
-      <div className="w-full max-w-md flex flex-col items-center gap-6">
-        {/* 헤더: 기록목록 / 로고 / (내역작성 + 달력 + 로그아웃) */}
-        <div className="w-full relative flex items-center justify-between">
-          {/* 왼쪽: 목록 버튼 */}
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-sky-50 text-gray-900 flex items-start justify-center p-4 pt-6">
+      <div className="w-full max-w-md flex flex-col items-center gap-5">
+        {/* 헤더: 좌측(목록+추가) / 중앙 로고 / 우측(달력+로그아웃) */}
+        <div className="w-full relative flex items-center justify-between bg-white rounded-2xl p-3 shadow-sm border border-sky-100">
+          {/* 왼쪽: 목록 + (이동한) 플러스 */}
           <div className="flex items-center gap-2">
             <button
               aria-label="내 기록 목록"
               onClick={() => setOpenList(true)}
-              className="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-gray-200 hover:bg-gray-50"
+              className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-sky-50 hover:bg-sky-100 transition text-sky-600"
             >
-              <List className="w-5 h-5 text-gray-700" />
+              <List className="w-5 h-5" />
             </button>
-          </div>
-
-          {/* 중앙: 로고(절대 중앙) */}
-          <div className="absolute left-1/2 -translate-x-1/2">
-            <svg
-              className="h-8 md:h-10 w-auto"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 566.9 234.9"
-              preserveAspectRatio="xMidYMid meet"
-            >
-              <path
-                d="M565.1,234.9H1.8v-18.8h563.2V234.9z M348.8,167.3h-42.1v26.4h-16v-26.4h-42.1v-13h100.3V167.3z M555.6,193.6h-15.3V93
-                h15.3V193.6z M26.7,180.6H97v12.6H11.4v-32.7h15.3V180.6z M137.2,158.5h52.7v-9.8h15.3v44.5h-83.4v-44.5h15.3V158.5z M413.7,176.9
-                h42.1v13H355.6v-13h42.1V155h16V176.9z M481.9,127.8h29.5V95.6h15.3v90.9h-60.2V95.6h15.3V127.8z M137.2,181h52.7v-10.4h-52.7V181z
-                M481.9,173.7h29.5v-33h-29.5V173.7z M94.8,120.5h13.5v13.7H94.8v32.4H79.5V93h15.3V120.5z M413.6,108.5c0,4.9,1,9.4,2.9,13.5
-                c2,4.1,4.6,7.8,8,10.9c3.4,3.2,7.3,5.8,11.8,7.9c4.5,2,9.3,3.4,14.4,4.2v12.3c-4.4-0.5-8.8-1.4-13.1-2.7c-4.3-1.4-8.4-3-12.3-5.1
-                c-3.9-2-7.5-4.4-10.9-7.1c-3.3-2.8-6.2-5.9-8.8-9.2c-2.6,3.4-5.5,6.5-8.9,9.2c-3.4,2.7-7,5.1-10.9,7.1c-3.8,2-7.9,3.7-12.3,5.1
-                c-4.3,1.3-8.6,2.2-13,2.7V145c5-0.8,9.8-2.1,14.3-4.2c4.5-2.1,8.4-4.7,11.8-7.9c3.4-3.2,6.1-6.8,8-10.9c2-4.1,3-8.6,3-13.5V92.9
-                h15.8V108.5z M44,113.2c3.6,0,6.9,0.4,9.9,1.3c3.1,0.8,5.7,2.1,7.9,3.8c2.3,1.7,4,3.9,5.2,6.5c1.3,2.6,1.9,5.7,1.9,9.1
-                c0,3.5-0.6,6.6-1.9,9.2c-1.2,2.6-2.9,4.7-5.2,6.4c-2.2,1.7-4.8,3-7.9,3.9c-3,0.8-6.3,1.2-9.9,1.2H31.8c-3.6,0-7-0.4-10-1.2
-                c-3-0.9-5.6-2.2-7.9-3.9c-2.2-1.7-3.9-3.9-5.2-6.4c-1.2-2.6-1.8-5.7-1.8-9.2c0-3.5,0.6-6.5,1.8-9.1c1.3-2.6,3-4.8,5.2-6.5
-                c2.3-1.7,4.9-3,7.9-3.8c3.1-0.9,6.4-1.3,10-1.3H44z M205.2,145.3h-15.3V93h15.3V145.3z M176.4,106.3h-22.6v1.8c0,2.9,0.5,5.5,1.6,8
-                c1.1,2.5,2.7,4.7,4.7,6.6c2,2,4.5,3.6,7.3,5.1c2.9,1.4,6.1,2.5,9.6,3.3v12.3c-6.3-1.1-12.2-3.1-17.7-5.9
-                c-5.4-2.8-9.9-6.2-13.5-10.1c-3.8,4.5-8.4,8.1-13.9,10.9c-5.5,2.8-11.6,4.8-18.5,6V132c3.5-0.5,6.8-1.5,9.8-3
-                c3-1.5,5.6-3.3,7.8-5.4c2.2-2.1,3.9-4.5,5.1-7.1c1.2-2.6,1.8-5.4,1.8-8.3v-1.8H114V94.2h62.4V106.3z M340.9,108h-68.6v22.9h70.3
-                v12.8H257V95.2h83.9V108z M33.9,125.4c-3.6,0-6.5,0.8-8.6,2.3c-2.1,1.5-3.2,3.6-3.2,6.4c0,2.8,1.1,4.9,3.2,6.4
-                c2.1,1.5,5,2.2,8.6,2.2h7.9c3.8,0,6.6-0.7,8.7-2.2c2-1.5,3-3.6,3-6.4c0-2.8-1-4.9-3-6.4c-2-1.5-4.9-2.3-8.7-2.3H33.9z M46,98.1
-                h25.1v11.6H4.7V98.1h25.1v-8.2H46	V98.1z M285.3,0.4l281.6,56.3l-3.7,18.4l-279.8-56L3.7,75.1L0,56.7L281.6,0.4l1.8-0.4L285.3,0.4z"
-                fill="currentColor"
-              />
-            </svg>
-          </div>
-
-          {/* 오른쪽: 내역 작성/달력/로그아웃 */}
-          <div className="flex items-center gap-2">
             <button
               aria-label="내역 작성"
               onClick={() => setOpenAdd(true)}
-              className="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-gray-200 hover:bg-gray-50"
+              className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-sky-400 to-blue-500 hover:from-sky-500 hover:to-blue-600 transition text-white shadow-md"
             >
-              <Plus className="w-5 h-5 text-gray-700" />
+              <Plus className="w-5 h-5" />
             </button>
+          </div>
+
+          {/* 가운데: 로고 (절대 중앙) */}
+          <div className="absolute left-1/2 -translate-x-1/2">
+            <svg className="h-7 w-auto" viewBox="0 0 212.429 32.202" xmlns="http://www.w3.org/2000/svg">
+              <path fill="#189EFF" d="m14.951,15.9h-4.229v15.791h-6.492v-15.791H0v-5.579h4.229V3.976h6.492v6.346h4.229v5.579Z"/>
+              <path fill="#189EFF" d="m51.489,10.321l-7.148,21.37h-6.527l-3.866-12.217-3.829,12.217h-6.491l-7.147-21.370h6.855l3.793,13.748,3.72-13.748h6.638l3.756,13.821,3.793-13.821h6.455Z"/>
+              <path fill="#189EFF" d="m61.657,3.976c0,2.297-1.678,3.975-3.975,3.975s-3.976-1.678-3.976-3.975,1.678-3.976,3.976-3.976,3.975,1.678,3.975,3.976Zm-.729,27.789h-6.491V10.321h6.491v21.443Z"/>
+              <path fill="#189EFF" d="m65.812,10.321h6.491v2.188c1.276-1.714,3.246-2.698,5.981-2.698,4.959,0,8.351,3.61,8.351,9.518v12.363h-6.491v-11.269c0-3.246-1.312-5.033-3.756-5.033-2.553,0-4.085,2.006-4.085,5.324v10.978h-6.491V10.321Z"/>
+              <path fill="#189EFF" d="m123.283,10.321l-7.148,21.37h-6.527l-3.866-12.217-3.829,12.217h-6.491l-7.147-21.370h6.855l3.793,13.748,3.72-13.748h6.638l3.756,13.821,3.793-13.821h6.455Z"/>
+              <path fill="#189EFF" d="m124.188,21.006c0-6.491,4.267-11.195,10.394-11.195,2.808,0,4.85.984,6.126,2.698v-2.188h6.492v21.37h-6.492v-2.188c-1.276,1.714-3.318,2.699-6.126,2.699-6.127,0-10.394-4.705-10.394-11.196Zm16.629,0c0-3.282-2.042-5.652-5.215-5.652-3.1,0-5.068,2.37-5.068,5.652s1.969,5.653,5.068,5.653c3.173,0,5.215-2.371,5.215-5.653Z"/>
+              <path fill="#189EFF" d="m158.573,31.691h-6.491V1.058h6.491v30.634Z"/>
+              <path fill="#189EFF" d="m169.949,31.691h-6.491V1.058h6.491v30.634Z"/>
+              <path fill="#189EFF" d="m173.74,21.006c0-6.491,4.595-11.195,11.123-11.195s11.122,4.668,11.122,11.195c0,.62-.036,1.313-.146,2.079h-15.645c.51,2.479,2.225,3.902,4.668,3.902,1.859,0,3.392-.657,3.938-1.678h6.527c-1.094,4.084-5.288,6.893-10.466,6.893-6.528,0-11.123-4.668-11.123-11.196Zm15.9-2.115c-.548-2.553-2.225-3.938-4.777-3.938s-4.158,1.386-4.705,3.938h9.482Z"/>
+              <path fill="#189EFF" d="m212.429,15.9h-4.229v15.791h-6.492v-15.791h-4.23v-5.579h4.23V3.976h6.492v6.346h4.229v5.579Z"/>
+            </svg>
+          </div>
+
+          {/* 오른쪽: 달력 + 로그아웃 */}
+          <div className="flex items-center gap-2">
             <button
               aria-label="달력 열기"
               onClick={() => setOpenCalendar(true)}
-              className="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-gray-200 hover:bg-gray-50"
+              className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-sky-50 hover:bg-sky-100 transition text-sky-600"
             >
-              <Calendar className="w-5 h-5 text-gray-700" />
+              <Calendar className="w-5 h-5" />
             </button>
             <button
               aria-label="로그아웃"
               onClick={logout}
-              className="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-gray-200 hover:bg-gray-50"
+              className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-red-50 hover:bg-red-100 transition text-red-500"
               title="로그아웃"
             >
-              <LogOut className="w-5 h-5 text-gray-700" />
+              <LogOut className="w-4 h-4" />
             </button>
           </div>
         </div>
 
-        {/* 알림 카드 */}
         {alerts.length > 0 && (
-          <div className="w-full bg-yellow-50 border border-yellow-300 text-yellow-800 p-3 rounded-xl">
-            <div className="flex items-center gap-2 mb-1">
-              <AlertCircle className="w-4 h-4" />
-              <strong>알림</strong>
+          <div className="w-full bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-200 text-amber-800 p-4 rounded-2xl shadow-sm">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center">
+                <AlertCircle className="w-5 h-5 text-amber-600" />
+              </div>
+              <strong className="text-base">알림</strong>
             </div>
             {alerts.map((a, i) => (
-              <p key={i}>• {a}</p>
+              <p key={i} className="ml-10 text-sm">• {a}</p>
             ))}
           </div>
         )}
 
-        {/* 사용자 카드 */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
           <UserCard
             name="지영"
@@ -298,67 +276,98 @@ export default function App() {
           />
         </div>
 
-        {/* 액션 */}
         <div className="w-full flex flex-col gap-3">
           <ActionCard
             icon={<PieChart className="w-5 h-5" />}
-            text="월말 요약"
+            text="월말 요약 보기"
             onClick={() => setOpenEom(true)}
           />
         </div>
       </div>
 
-      {openCalendar && (
-        <CalendarModal onClose={() => setOpenCalendar(false)} tx={tx} />
+      {openCalendar && <CalendarModal onClose={() => setOpenCalendar(false)} tx={tx} />}
+      {openList && (
+        <ListModal
+          onClose={() => setOpenList(false)}
+          tx={tx}
+          onEdit={(row) => {
+            setEditingTx(row);
+            setOpenEdit(true);
+          }}
+        />
       )}
-      {openList && <ListModal onClose={() => setOpenList(false)} tx={tx} />}
       {openEom && <EomSummaryModal onClose={() => setOpenEom(false)} tx={tx} />}
       {openAdd && <AddTxModal onClose={() => setOpenAdd(false)} onSubmit={addTx} />}
+      {openEdit && editingTx && (
+        <EditTxModal
+          initial={editingTx}
+          onClose={() => {
+            setOpenEdit(false);
+            setEditingTx(null);
+          }}
+          onSubmit={async (updates) => {
+            await updateTx(editingTx.id, updates);
+            setOpenEdit(false);
+            setEditingTx(null);
+          }}
+        />
+      )}
     </div>
   );
 }
 
-/* ----------------------- Components ----------------------- */
 function UserCard({ name, living, livingLimit, dining, diningLimit }) {
   const leftLiving = Math.max(0, livingLimit - living);
   const leftDining = Math.max(0, diningLimit - dining);
 
   return (
-    <div className="bg-white shadow-sm border border-gray-200 rounded-xl p-4">
-      <h3 className="text-base font-semibold mb-2">{name}</h3>
+    <div className="bg-white shadow-md border-2 border-sky-100 rounded-2xl p-5 hover:shadow-lg transition">
+      <h3 className="text-lg font-bold mb-3 text-sky-600">💙 {name}</h3>
       <div className="mb-4">
-        <div className="flex items-center gap-1 text-blue-600 mb-1">
-          <Wallet className="w-4 h-4" /> <span className="text-sm">생활비</span>
+        <div className="flex items-center gap-2 text-sky-600 mb-2">
+          <div className="w-7 h-7 bg-sky-50 rounded-lg flex items-center justify-center">
+            <Wallet className="w-4 h-4" />
+          </div>
+          <span className="text-sm font-semibold">생활비</span>
         </div>
-        <ProgressBar value={(living / livingLimit) * 100} />
-        <p className="text-xs text-gray-700 mt-1">
+        <ProgressBar value={(living / livingLimit) * 100} color="sky" />
+        <p className="text-xs text-gray-600 mt-2">
           {living.toLocaleString()} / {livingLimit.toLocaleString()}원
         </p>
-        <p className="text-xs text-green-600">
-          남은 금액: {leftLiving.toLocaleString()}원
+        <p className="text-xs text-green-600 font-semibold">
+          💰 남은 금액: {leftLiving.toLocaleString()}원
         </p>
       </div>
       <div>
-        <div className="flex items-center gap-1 text-orange-600 mb-1">
-          <Utensils className="w-4 h-4" /> <span className="text-sm">외식비</span>
+        <div className="flex items-center gap-2 text-orange-500 mb-2">
+          <div className="w-7 h-7 bg-orange-50 rounded-lg flex items-center justify-center">
+            <Utensils className="w-4 h-4" />
+          </div>
+          <span className="text-sm font-semibold">외식비</span>
         </div>
-        <ProgressBar value={(dining / diningLimit) * 100} />
-        <p className="text-xs text-gray-700 mt-1">
+        <ProgressBar value={(dining / diningLimit) * 100} color="orange" />
+        <p className="text-xs text-gray-600 mt-2">
           {dining.toLocaleString()} / {diningLimit.toLocaleString()}원
         </p>
-        <p className="text-xs text-green-600">
-          남은 금액: {leftDining.toLocaleString()}원
+        <p className="text-xs text-green-600 font-semibold">
+          💰 남은 금액: {leftDining.toLocaleString()}원
         </p>
       </div>
     </div>
   );
 }
 
-function ProgressBar({ value }) {
+function ProgressBar({ value, color = "sky" }) {
+  const bgColor = color === "sky" ? "bg-sky-100" : "bg-orange-100";
+  const barColor =
+    color === "sky"
+      ? "bg-gradient-to-r from-sky-400 to-blue-500"
+      : "bg-gradient-to-r from-orange-400 to-red-500";
+
   return (
-    <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
+    <div className={`h-3 w-full ${bgColor} rounded-full overflow-hidden shadow-inner`}>
       <div
-        className="h-full bg-gray-800 transition-all"
+        className={`h-full ${barColor} transition-all duration-500 rounded-full`}
         style={{ width: `${Math.min(100, Math.max(0, value))}%` }}
       />
     </div>
@@ -369,71 +378,65 @@ function ActionCard({ icon, text, onClick }) {
   return (
     <button
       onClick={onClick}
-      className="flex items-center gap-3 px-4 py-3 bg-green-50 rounded-lg border border-green-200 text-left hover:bg-green-100"
+      className="flex items-center gap-3 px-5 py-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl border-2 border-purple-100 text-left hover:from-purple-100 hover:to-pink-100 hover:shadow-md transition"
     >
-      <div className="text-green-600 flex-shrink-0">{icon}</div>
-      <p className="text-gray-700 text-sm">{text}</p>
+      <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-purple-500 shadow-sm">
+        {icon}
+      </div>
+      <p className="text-gray-800 text-sm font-semibold">{text}</p>
     </button>
   );
 }
 
 function CalendarModal({ onClose, tx }) {
   const today = new Date();
-  const [cursor, setCursor] = useState(
-    new Date(today.getFullYear(), today.getMonth(), 1)
-  );
+  const [cursor, setCursor] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
   const [selected, setSelected] = useState(formatDate(today));
 
   const { year, month, grid } = useMemo(() => buildMonthGrid(cursor), [cursor]);
   const daily = useMemo(() => summarizeByDate(tx), [tx]);
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center p-4 z-50">
-      <div className="w-full max-w-sm bg-white rounded-2xl shadow-xl overflow-hidden">
-        <div className="flex items-center justify-between px-4 py-3 border-b">
-          <div className="font-medium">달력</div>
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+      <div className="w-full max-w-sm bg-white rounded-3xl shadow-2xl overflow-hidden border-2 border-sky-100">
+        <div className="flex items-center justify-between px-5 py-4 border-b bg-gradient-to-r from-sky-50 to-blue-50">
+          <div className="font-bold text-sky-700">📅 달력</div>
           <button
             aria-label="닫기"
             onClick={onClose}
-            className="w-8 h-8 grid place-items-center rounded-md hover:bg-gray-100"
+            className="w-9 h-9 grid place-items-center rounded-xl hover:bg-white transition"
           >
-            <X className="w-4 h-4" />
+            <X className="w-5 h-5" />
           </button>
         </div>
-        <div className="p-4">
-          <div className="flex items-center justify-between mb-3">
+        <div className="p-5">
+          <div className="flex items-center justify-between mb-4">
             <button
-              className="px-2 py-1 rounded hover:bg-gray-50"
-              onClick={() =>
-                setCursor(new Date(cursor.getFullYear(), cursor.getMonth() - 1, 1))
-              }
+              className="px-3 py-2 rounded-xl hover:bg-sky-50 font-semibold text-sky-600"
+              onClick={() => setCursor(new Date(cursor.getFullYear(), cursor.getMonth() - 1, 1))}
             >
               ◀
             </button>
-            <div className="font-semibold">
+            <div className="font-bold text-lg">
               {year}년 {month + 1}월
             </div>
             <button
-              className="px-2 py-1 rounded hover:bg-gray-50"
-              onClick={() =>
-                setCursor(new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1))
-              }
+              className="px-3 py-2 rounded-xl hover:bg-sky-50 font-semibold text-sky-600"
+              onClick={() => setCursor(new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1))}
             >
               ▶
             </button>
           </div>
 
-          <div className="grid grid-cols-7 text-center text-xs text-gray-500 mb-1">
+          <div className="grid grid-cols-7 text-center text-xs font-semibold text-gray-500 mb-2">
             {["일", "월", "화", "수", "목", "금", "토"].map((d) => (
-              <div key={d} className="py-1">
-                {d}
-              </div>
+              <div key={d} className="py-2">{d}</div>
             ))}
           </div>
 
           <div className="grid grid-cols-7 gap-1">
             {grid.map((cell, idx) => {
-              if (!cell) return <div key={idx} className="h-10" />;
+              if (!cell) return <div key={idx} className="h-11" />;
               const iso = formatDate(cell);
               const isToday = sameDate(cell, today);
               const isSelected = iso === selected;
@@ -442,28 +445,30 @@ function CalendarModal({ onClose, tx }) {
                 <button
                   key={idx}
                   onClick={() => setSelected(iso)}
-                  className={`h-10 rounded-md text-sm relative border transition ${
-                    isSelected ? "border-blue-600" : "border-transparent"
-                  } hover:bg-gray-50`}
+                  className={`h-11 rounded-xl text-sm relative border-2 transition font-medium ${
+                    isSelected
+                      ? "border-sky-400 bg-sky-50 text-sky-700 shadow-sm"
+                      : "border-transparent hover:bg-gray-50"
+                  }`}
                 >
                   <div className="flex items-center justify-center h-full">
-                    <span className={`relative px-2 ${isToday ? "text-white" : ""}`}>
+                    <span className={`relative ${isToday ? "text-white" : ""}`}>
                       {cell.getDate()}
                       {isToday && (
-                        <span className="absolute inset-0 -z-10 rounded-full bg-blue-600" />
+                        <span className="absolute inset-0 -z-10 rounded-full bg-gradient-to-br from-sky-400 to-blue-500 scale-110" />
                       )}
                     </span>
                   </div>
                   {sum > 0 && (
-                    <span className="absolute bottom-1 left-1/2 -translate-x-1/2 h-1.5 w-1.5 rounded-full bg-green-600" />
+                    <span className="absolute bottom-1 left-1/2 -translate-x-1/2 h-1.5 w-1.5 rounded-full bg-green-500 shadow-sm" />
                   )}
                 </button>
               );
             })}
           </div>
 
-          <div className="mt-4 border-t pt-3 text-sm">
-            <div className="font-medium mb-1">
+          <div className="mt-5 border-t-2 pt-4 text-sm bg-sky-50 rounded-xl p-4">
+            <div className="font-bold mb-2 text-sky-700">
               {selected.replaceAll("-", ".")} 사용 내역
             </div>
             <DateBreakdown selected={selected} tx={tx} />
@@ -474,7 +479,7 @@ function CalendarModal({ onClose, tx }) {
   );
 }
 
-function ListModal({ onClose, tx }) {
+function ListModal({ onClose, tx, onEdit }) {
   const today = new Date();
   const [who, setWho] = useState("all");
   const [period, setPeriod] = useState("week");
@@ -503,123 +508,108 @@ function ListModal({ onClose, tx }) {
   const total = rows.reduce((s, r) => s + (Number(r.amount) || 0), 0);
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center p-4 z-50">
-      <div className="w-full max-w-sm bg-white rounded-2xl shadow-xl overflow-hidden">
-        <div className="flex items-center justify-between px-4 py-3 border-b">
-          <div className="font-medium">내 기록 목록</div>
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+      <div className="w-full max-w-sm bg-white rounded-3xl shadow-2xl overflow-hidden border-2 border-sky-100">
+        <div className="flex items-center justify-between px-5 py-4 border-b bg-gradient-to-r from-sky-50 to-blue-50">
+          <div className="font-bold text-sky-700">📋 내 기록 목록</div>
           <button
             aria-label="닫기"
             onClick={onClose}
-            className="w-8 h-8 grid place-items-center rounded-md hover:bg-gray-100"
+            className="w-9 h-9 grid place-items-center rounded-xl hover:bg-white transition"
           >
-            <X className="w-4 h-4" />
+            <X className="w-5 h-5" />
           </button>
         </div>
-        <div className="p-4 space-y-4 text-sm">
+        <div className="p-5 space-y-4 text-sm">
           <div>
-            <div className="text-xs text-gray-600 mb-1">이름</div>
+            <div className="text-xs font-semibold text-gray-600 mb-2">이름</div>
             <div className="flex items-center gap-3">
-              <label className="inline-flex items-center gap-1">
-                <input
-                  type="radio"
-                  checked={who === "all"}
-                  onChange={() => setWho("all")}
-                />{" "}
+              <label className="inline-flex items-center gap-2 px-3 py-2 bg-sky-50 rounded-xl cursor-pointer hover:bg-sky-100 transition">
+                <input type="radio" checked={who === "all"} onChange={() => setWho("all")} className="text-sky-500" />
                 전체
               </label>
-              <label className="inline-flex items-center gap-1">
-                <input
-                  type="radio"
-                  checked={who === "지영"}
-                  onChange={() => setWho("지영")}
-                />{" "}
+              <label className="inline-flex items-center gap-2 px-3 py-2 bg-sky-50 rounded-xl cursor-pointer hover:bg-sky-100 transition">
+                <input type="radio" checked={who === "지영"} onChange={() => setWho("지영")} className="text-sky-500" />
                 지영
               </label>
-              <label className="inline-flex items-center gap-1">
-                <input
-                  type="radio"
-                  checked={who === "지원"}
-                  onChange={() => setWho("지원")}
-                />{" "}
+              <label className="inline-flex items-center gap-2 px-3 py-2 bg-sky-50 rounded-xl cursor-pointer hover:bg-sky-100 transition">
+                <input type="radio" checked={who === "지원"} onChange={() => setWho("지원")} className="text-sky-500" />
                 지원
               </label>
             </div>
           </div>
 
           <div>
-            <div className="text-xs text-gray-600 mb-1">기간</div>
-            <div className="flex items-center gap-3 flex-wrap">
-              <label className="inline-flex items-center gap-1">
-                <input
-                  type="radio"
-                  checked={period === "week"}
-                  onChange={() => applyPreset("week")}
-                />{" "}
+            <div className="text-xs font-semibold text-gray-600 mb-2">기간</div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <label className="inline-flex items-center gap-2 px-3 py-2 bg-sky-50 rounded-xl cursor-pointer hover:bg-sky-100 transition">
+                <input type="radio" checked={period === "week"} onChange={() => applyPreset("week")} className="text-sky-500" />
                 이번 주
               </label>
-              <label className="inline-flex items-center gap-1">
-                <input
-                  type="radio"
-                  checked={period === "month"}
-                  onChange={() => applyPreset("month")}
-                />{" "}
+              <label className="inline-flex items-center gap-2 px-3 py-2 bg-sky-50 rounded-xl cursor-pointer hover:bg-sky-100 transition">
+                <input type="radio" checked={period === "month"} onChange={() => applyPreset("month")} className="text-sky-500" />
                 이번 달
               </label>
-              <label className="inline-flex items-center gap-1">
-                <input
-                  type="radio"
-                  checked={period === "custom"}
-                  onChange={() => applyPreset("custom")}
-                />{" "}
+              <label className="inline-flex items-center gap-2 px-3 py-2 bg-sky-50 rounded-xl cursor-pointer hover:bg-sky-100 transition">
+                <input type="radio" checked={period === "custom"} onChange={() => applyPreset("custom")} className="text-sky-500" />
                 직접 설정
               </label>
             </div>
             {period === "custom" && (
-              <div className="mt-2 grid grid-cols-2 gap-2">
+              <div className="mt-3 grid grid-cols-2 gap-2">
                 <input
                   type="date"
                   value={start}
                   onChange={(e) => setStart(e.target.value)}
-                  className="border rounded-md px-2 py-2"
+                  className="border-2 border-sky-200 rounded-xl px-3 py-2 focus:border-sky-400 focus:ring-2 focus:ring-sky-200 outline-none"
                 />
                 <input
                   type="date"
                   value={end}
                   onChange={(e) => setEnd(e.target.value)}
-                  className="border rounded-md px-2 py-2"
+                  className="border-2 border-sky-200 rounded-xl px-3 py-2 focus:border-sky-400 focus:ring-2 focus:ring-sky-200 outline-none"
                 />
               </div>
             )}
           </div>
 
-          <div className="border rounded-lg divide-y max-h-72 overflow-auto">
+          <div className="border-2 border-sky-100 rounded-2xl divide-y divide-sky-100 max-h-72 overflow-auto">
             {rows.length === 0 && (
-              <div className="p-3 text-gray-500">해당 기간 내 기록 없음</div>
+              <div className="p-4 text-center text-gray-400">해당 기간 내 기록 없음</div>
             )}
             {rows.map((r, i) => (
               <div
                 key={i}
-                className="p-3 grid grid-cols-[88px_1fr_auto] items-center gap-2"
+                className="p-3 grid grid-cols-[88px_1fr_auto_auto] items-center gap-3 hover:bg-sky-50 transition"
               >
-                <div className="text-gray-500 text-xs">
+                <div className="text-gray-500 text-xs font-medium">
                   {String(r.date).replaceAll("-", ".")}
                 </div>
                 <div className="text-xs">
-                  <span className="text-gray-600 mr-1">{r.user}</span>
-                  <span className="text-gray-800">
+                  <span className="text-sky-600 font-semibold mr-1">{r.user}</span>
+                  <span className="text-gray-700">
                     {r.place} — {r.item}
                   </span>
                 </div>
-                <div className="font-medium">
+                <div className="font-bold text-sky-700 whitespace-nowrap">
                   ₩{Number(r.amount).toLocaleString("ko-KR")}
                 </div>
+                <button
+                  aria-label="수정"
+                  onClick={() => onEdit(r)}
+                  className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs rounded-lg border border-sky-200 text-sky-600 hover:bg-sky-50"
+                  title="수정"
+                >
+                  <Pencil className="w-3.5 h-3.5" />
+                  수정
+                </button>
               </div>
             ))}
           </div>
 
-          <div className="flex items-center justify-between font-semibold">
+          <div className="flex items-center justify-between font-bold text-base bg-gradient-to-r from-sky-50 to-blue-50 p-4 rounded-2xl border-2 border-sky-200">
             <span>합계</span>
-            <span>₩{total.toLocaleString("ko-KR")}</span>
+            <span className="text-sky-600">₩{total.toLocaleString("ko-KR")}</span>
           </div>
         </div>
       </div>
@@ -629,10 +619,7 @@ function ListModal({ onClose, tx }) {
 
 function EomSummaryModal({ onClose, tx }) {
   const today = new Date();
-  const monthKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(
-    2,
-    "0"
-  )}`;
+  const monthKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}`;
   const monthTx = tx.filter((t) => String(t.date).startsWith(monthKey));
   const totals = monthTx.reduce(
     (acc, t) => {
@@ -645,59 +632,60 @@ function EomSummaryModal({ onClose, tx }) {
     },
     { total: 0, byUser: { 지영: 0, 지원: 0 }, byCategory: { 생활: 0, 외식: 0 }, byPlace: {} }
   );
-  const topPlaces = Object.entries(totals.byPlace)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 3);
+  const topPlaces = Object.entries(totals.byPlace).sort((a, b) => b[1] - a[1]).slice(0, 3);
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center p-4 z-50">
-      <div className="w-full max-w-sm bg-white rounded-2xl shadow-xl overflow-hidden">
-        <div className="flex items-center justify-between px-4 py-3 border-b">
-          <div className="font-medium">월말 요약</div>
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+      <div className="w-full max-w-sm bg-white rounded-3xl shadow-2xl overflow-hidden border-2 border-purple-100">
+        <div className="flex items-center justify-between px-5 py-4 border-b bg-gradient-to-r from-purple-50 to-pink-50">
+          <div className="font-bold text-purple-700">📊 월말 요약</div>
           <button
             aria-label="닫기"
             onClick={onClose}
-            className="w-8 h-8 grid place-items-center rounded-md hover:bg-gray-100"
+            className="w-9 h-9 grid place-items-center rounded-xl hover:bg-white transition"
           >
-            <X className="w-4 h-4" />
+            <X className="w-5 h-5" />
           </button>
         </div>
-        <div className="p-4 text-sm space-y-3">
-          <div className="flex items-center justify-between font-semibold">
-            <span>이번 달 총 사용</span>
-            <span>₩{totals.total.toLocaleString("ko-KR")}</span>
+        <div className="p-5 text-sm space-y-4">
+          <div className="flex items-center justify-between font-bold text-lg bg-gradient-to-r from-sky-50 to-blue-50 p-4 rounded-2xl border-2 border-sky-200">
+            <span>💸 이번 달 총 사용</span>
+            <span className="text-sky-600">₩{totals.total.toLocaleString("ko-KR")}</span>
           </div>
-          <div className="grid grid-cols-2 gap-2">
-            <div className="border rounded-lg p-3">
-              <div className="font-medium mb-2">사용자별</div>
-              <div className="flex items-center justify-between">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="border-2 border-sky-100 rounded-2xl p-4 bg-sky-50">
+              <div className="font-bold mb-3 text-sky-700">👥 사용자별</div>
+              <div className="flex items-center justify-between mb-2">
                 <span className="text-gray-600">지영</span>
-                <span>₩{totals.byUser.지영.toLocaleString("ko-KR")}</span>
+                <span className="font-semibold">₩{totals.byUser.지영.toLocaleString("ko-KR")}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-gray-600">지원</span>
-                <span>₩{totals.byUser.지원.toLocaleString("ko-KR")}</span>
+                <span className="font-semibold">₩{totals.byUser.지원.toLocaleString("ko-KR")}</span>
               </div>
             </div>
-            <div className="border rounded-lg p-3">
-              <div className="font-medium mb-2">카테고리별</div>
-              <div className="flex items-center justify-between">
+            <div className="border-2 border-orange-100 rounded-2xl p-4 bg-orange-50">
+              <div className="font-bold mb-3 text-orange-700">📑 카테고리별</div>
+              <div className="flex items-center justify-between mb-2">
                 <span className="text-gray-600">생활</span>
-                <span>₩{(totals.byCategory.생활 || 0).toLocaleString("ko-KR")}</span>
+                <span className="font-semibold">₩{(totals.byCategory.생활 || 0).toLocaleString("ko-KR")}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-gray-600">외식</span>
-                <span>₩{(totals.byCategory.외식 || 0).toLocaleString("ko-KR")}</span>
+                <span className="font-semibold">₩{(totals.byCategory.외식 || 0).toLocaleString("ko-KR")}</span>
               </div>
             </div>
           </div>
-          <div className="border rounded-lg p-3">
-            <div className="font-medium mb-2">어디서 많이 썼나요? (Top 3 사용처)</div>
-            {topPlaces.length === 0 && <div className="text-gray-500">데이터 없음</div>}
-            {topPlaces.map(([place, amt]) => (
-              <div key={place} className="flex items-center justify-between">
-                <span className="text-gray-600">{place}</span>
-                <span>₩{amt.toLocaleString("ko-KR")}</span>
+          <div className="border-2 border-purple-100 rounded-2xl p-4 bg-purple-50">
+            <div className="font-bold mb-3 text-purple-700">🏆 어디서 많이 썼나요? (Top 3)</div>
+            {topPlaces.length === 0 && <div className="text-gray-400 text-center py-2">데이터 없음</div>}
+            {topPlaces.map(([place, amt], idx) => (
+              <div key={place} className="flex items-center justify-between mb-2">
+                <span className="text-gray-600">
+                  <span className="inline-block w-6 font-bold text-purple-500">{idx + 1}.</span>
+                  {place}
+                </span>
+                <span className="font-semibold">₩{amt.toLocaleString("ko-KR")}</span>
               </div>
             ))}
           </div>
@@ -732,55 +720,44 @@ function AddTxModal({ onClose, onSubmit }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!canSubmit) return;
-    await onSubmit({
-      ...form,
-      amount: Number(form.amount) || 0,
-    });
+    await onSubmit({ ...form, amount: Number(form.amount) || 0 });
     onClose();
   };
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50">
-      <div className="w-full max-w-sm bg-white rounded-2xl shadow-xl overflow-hidden">
-        <div className="flex items-center justify-between px-4 py-3 border-b">
-          <div className="font-medium">내역 작성</div>
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+      <div className="w-full max-w-sm bg-white rounded-3xl shadow-2xl overflow-hidden border-2 border-sky-100">
+        <div className="flex items-center justify-between px-5 py-4 border-b bg-gradient-to-r from-sky-50 to-blue-50">
+          <div className="font-bold text-sky-700">✏️ 내역 작성</div>
           <button
             aria-label="닫기"
             onClick={onClose}
-            className="w-8 h-8 grid place-items-center rounded-md hover:bg-gray-100"
+            className="w-9 h-9 grid place-items-center rounded-xl hover:bg-white transition"
           >
-            <X className="w-4 h-4" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-4 space-y-3 text-sm">
-          <div className="grid grid-cols-2 gap-2">
+        <form onSubmit={handleSubmit} className="p-5 space-y-4 text-sm">
+          <div className="grid grid-cols-2 gap-3">
             <div>
-              <div className="text-xs text-gray-600 mb-1">날짜</div>
+              <div className="text-xs font-semibold text-gray-600 mb-2">날짜</div>
               <input
                 type="date"
                 value={form.date}
                 onChange={(e) => handleChange("date", e.target.value)}
-                className="w-full border rounded-md px-2 py-2"
+                className="w-full border-2 border-sky-200 rounded-xl px-3 py-2 focus:border-sky-400 focus:ring-2 focus:ring-sky-200 outline-none"
               />
             </div>
             <div>
-              <div className="text-xs text-gray-600 mb-1">사용자</div>
-              <div className="flex items-center gap-3">
-                <label className="inline-flex items-center gap-1">
-                  <input
-                    type="radio"
-                    checked={form.user === "지영"}
-                    onChange={() => handleChange("user", "지영")}
-                  />{" "}
+              <div className="text-xs font-semibold text-gray-600 mb-2">사용자</div>
+              <div className="flex items-center gap-2">
+                <label className="inline-flex items-center gap-1 px-3 py-2 bg-sky-50 rounded-xl cursor-pointer hover:bg-sky-100 transition text-xs">
+                  <input type="radio" checked={form.user === "지영"} onChange={() => handleChange("user", "지영")} className="text-sky-500" />
                   지영
                 </label>
-                <label className="inline-flex items-center gap-1">
-                  <input
-                    type="radio"
-                    checked={form.user === "지원"}
-                    onChange={() => handleChange("user", "지원")}
-                  />{" "}
+                <label className="inline-flex items-center gap-1 px-3 py-2 bg-sky-50 rounded-xl cursor-pointer hover:bg-sky-100 transition text-xs">
+                  <input type="radio" checked={form.user === "지원"} onChange={() => handleChange("user", "지원")} className="text-sky-500" />
                   지원
                 </label>
               </div>
@@ -788,71 +765,196 @@ function AddTxModal({ onClose, onSubmit }) {
           </div>
 
           <div>
-            <div className="text-xs text-gray-600 mb-1">카테고리</div>
-            <div className="flex items-center gap-3">
-              <label className="inline-flex items-center gap-1">
-                <input
-                  type="radio"
-                  checked={form.category === "생활"}
-                  onChange={() => handleChange("category", "생활")}
-                />{" "}
+            <div className="text-xs font-semibold text-gray-600 mb-2">카테고리</div>
+            <div className="flex items-center gap-2">
+              <label className="inline-flex items-center gap-2 px-4 py-2 bg-sky-50 rounded-xl cursor-pointer hover:bg-sky-100 transition">
+                <input type="radio" checked={form.category === "생활"} onChange={() => handleChange("category", "생활")} className="text-sky-500" />
                 생활
               </label>
-              <label className="inline-flex items-center gap-1">
-                <input
-                  type="radio"
-                  checked={form.category === "외식"}
-                  onChange={() => handleChange("category", "외식")}
-                />{" "}
+              <label className="inline-flex items-center gap-2 px-4 py-2 bg-orange-50 rounded-xl cursor-pointer hover:bg-orange-100 transition">
+                <input type="radio" checked={form.category === "외식"} onChange={() => handleChange("category", "외식")} className="text-orange-500" />
                 외식
               </label>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-3">
             <div>
-              <div className="text-xs text-gray-600 mb-1">사용처</div>
+              <div className="text-xs font-semibold text-gray-600 mb-2">사용처</div>
               <input
                 type="text"
                 value={form.place}
                 onChange={(e) => handleChange("place", e.target.value)}
-                placeholder="이마트 / 카페 등"
-                className="w-full border rounded-md px-2 py-2"
+                placeholder="이마트"
+                className="w-full border-2 border-sky-200 rounded-xl px-3 py-2 focus:border-sky-400 focus:ring-2 focus:ring-sky-200 outline-none"
               />
             </div>
             <div>
-              <div className="text-xs text-gray-600 mb-1">구매 물건</div>
+              <div className="text-xs font-semibold text-gray-600 mb-2">구매 물건</div>
               <input
                 type="text"
                 value={form.item}
                 onChange={(e) => handleChange("item", e.target.value)}
-                placeholder="계란 / 디저트 등"
-                className="w-full border rounded-md px-2 py-2"
+                placeholder="계란"
+                className="w-full border-2 border-sky-200 rounded-xl px-3 py-2 focus:border-sky-400 focus:ring-2 focus:ring-sky-200 outline-none"
               />
             </div>
           </div>
 
           <div>
-            <div className="text-xs text-gray-600 mb-1">금액(원)</div>
+            <div className="text-xs font-semibold text-gray-600 mb-2">금액(원)</div>
             <input
               type="number"
               min={0}
               inputMode="numeric"
               value={form.amount}
               onChange={(e) => handleChange("amount", e.target.value)}
-              placeholder="0"
-              className="w-full border rounded-md px-2 py-2"
+              placeholder="10000"
+              className="w-full border-2 border-sky-200 rounded-xl px-3 py-2 focus:border-sky-400 focus:ring-2 focus:ring-sky-200 outline-none text-lg font-semibold"
             />
           </div>
 
           <button
             type="submit"
             disabled={!canSubmit}
-            className={`w-full py-2 rounded-md text-white ${
-              canSubmit ? "bg-blue-600 hover:bg-blue-700" : "bg-gray-300"
+            className={`w-full py-3 rounded-2xl text-white font-bold transition shadow-lg ${
+              canSubmit
+                ? "bg-gradient-to-r from-sky-400 to-blue-500 hover:from-sky-500 hover:to-blue-600 hover:shadow-xl transform hover:scale-[1.02]"
+                : "bg-gray-300 cursor-not-allowed"
             }`}
           >
-            저장
+            💾 저장하기
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+function EditTxModal({ initial, onClose, onSubmit }) {
+  const [form, setForm] = useState({
+    date: String(initial.date || ""),
+    user: initial.user || "지영",
+    category: initial.category || "생활",
+    place: initial.place || "",
+    item: initial.item || "",
+    amount: initial.amount ?? "",
+  });
+
+  const canSubmit =
+    form.date &&
+    form.user &&
+    form.category &&
+    form.place.trim() &&
+    form.item.trim() &&
+    String(form.amount).trim() !== "" &&
+    !Number.isNaN(Number(form.amount));
+
+  const handleChange = (k, v) => setForm((f) => ({ ...f, [k]: v }));
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!canSubmit) return;
+    await onSubmit({ ...form, amount: Number(form.amount) || 0 });
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+      <div className="w-full max-w-sm bg-white rounded-3xl shadow-2xl overflow-hidden border-2 border-sky-100">
+        <div className="flex items-center justify-between px-5 py-4 border-b bg-gradient-to-r from-sky-50 to-blue-50">
+          <div className="font-bold text-sky-700">🛠 내역 수정</div>
+          <button
+            aria-label="닫기"
+            onClick={onClose}
+            className="w-9 h-9 grid place-items-center rounded-xl hover:bg-white transition"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="p-5 space-y-4 text-sm">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <div className="text-xs font-semibold text-gray-600 mb-2">날짜</div>
+              <input
+                type="date"
+                value={form.date}
+                onChange={(e) => handleChange("date", e.target.value)}
+                className="w-full border-2 border-sky-200 rounded-xl px-3 py-2 focus:border-sky-400 focus:ring-2 focus:ring-sky-200 outline-none"
+              />
+            </div>
+            <div>
+              <div className="text-xs font-semibold text-gray-600 mb-2">사용자</div>
+              <div className="flex items-center gap-2">
+                <label className="inline-flex items-center gap-1 px-3 py-2 bg-sky-50 rounded-xl cursor-pointer hover:bg-sky-100 transition text-xs">
+                  <input type="radio" checked={form.user === "지영"} onChange={() => handleChange("user", "지영")} />
+                  지영
+                </label>
+                <label className="inline-flex items-center gap-1 px-3 py-2 bg-sky-50 rounded-xl cursor-pointer hover:bg-sky-100 transition text-xs">
+                  <input type="radio" checked={form.user === "지원"} onChange={() => handleChange("user", "지원")} />
+                  지원
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div className="text-xs font-semibold text-gray-600 mb-2">카테고리</div>
+            <div className="flex items-center gap-2">
+              <label className="inline-flex items-center gap-2 px-4 py-2 bg-sky-50 rounded-xl cursor-pointer hover:bg-sky-100 transition">
+                <input type="radio" checked={form.category === "생활"} onChange={() => handleChange("category", "생활")} />
+                생활
+              </label>
+              <label className="inline-flex items-center gap-2 px-4 py-2 bg-orange-50 rounded-xl cursor-pointer hover:bg-orange-100 transition">
+                <input type="radio" checked={form.category === "외식"} onChange={() => handleChange("category", "외식")} />
+                외식
+              </label>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <div className="text-xs font-semibold text-gray-600 mb-2">사용처</div>
+              <input
+                type="text"
+                value={form.place}
+                onChange={(e) => handleChange("place", e.target.value)}
+                className="w-full border-2 border-sky-200 rounded-xl px-3 py-2 focus:border-sky-400 focus:ring-2 focus:ring-sky-200 outline-none"
+              />
+            </div>
+            <div>
+              <div className="text-xs font-semibold text-gray-600 mb-2">구매 물건</div>
+              <input
+                type="text"
+                value={form.item}
+                onChange={(e) => handleChange("item", e.target.value)}
+                className="w-full border-2 border-sky-200 rounded-xl px-3 py-2 focus:border-sky-400 focus:ring-2 focus:ring-sky-200 outline-none"
+              />
+            </div>
+          </div>
+
+          <div>
+            <div className="text-xs font-semibold text-gray-600 mb-2">금액(원)</div>
+            <input
+              type="number"
+              min={0}
+              inputMode="numeric"
+              value={form.amount}
+              onChange={(e) => handleChange("amount", e.target.value)}
+              className="w-full border-2 border-sky-200 rounded-xl px-3 py-2 focus:border-sky-400 focus:ring-2 focus:ring-sky-200 outline-none text-lg font-semibold"
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={!canSubmit}
+            className={`w-full py-3 rounded-2xl text-white font-bold transition shadow-lg ${
+              canSubmit
+                ? "bg-gradient-to-r from-sky-400 to-blue-500 hover:from-sky-500 hover:to-blue-600 hover:shadow-xl transform hover:scale-[1.02]"
+                : "bg-gray-300 cursor-not-allowed"
+            }`}
+          >
+            ✅ 수정 저장
           </button>
         </form>
       </div>
@@ -872,30 +974,26 @@ function DateBreakdown({ selected, tx }) {
     { total: 0, byUser: { 지영: 0, 지원: 0 } }
   );
   return (
-    <div>
+    <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <span className="text-gray-600">지영</span>
-        <span>₩{totalBy.byUser.지영.toLocaleString("ko-KR")}</span>
+        <span className="text-sky-600 font-semibold">지영</span>
+        <span className="font-bold">₩{totalBy.byUser.지영.toLocaleString("ko-KR")}</span>
       </div>
       <div className="flex items-center justify-between">
-        <span className="text-gray-600">지원</span>
-        <span>₩{totalBy.byUser.지원.toLocaleString("ko-KR")}</span>
+        <span className="text-sky-600 font-semibold">지원</span>
+        <span className="font-bold">₩{totalBy.byUser.지원.toLocaleString("ko-KR")}</span>
       </div>
-      <div className="flex items-center justify-between font-semibold mt-1">
+      <div className="flex items-center justify-between font-bold text-base pt-2 border-t-2 border-sky-200">
         <span>합계</span>
-        <span>₩{totalBy.total.toLocaleString("ko-KR")}</span>
+        <span className="text-sky-600">₩{totalBy.total.toLocaleString("ko-KR")}</span>
       </div>
     </div>
   );
 }
 
-/* ----------------------- Helpers ----------------------- */
+/* ---------- Helpers ---------- */
 function sameDate(a, b) {
-  return (
-    a.getFullYear() === b.getFullYear() &&
-    a.getMonth() === b.getMonth() &&
-    a.getDate() === b.getDate()
-  );
+  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 }
 function formatDate(d) {
   const y = d.getFullYear();
@@ -910,9 +1008,7 @@ function buildMonthGrid(anchor) {
   const last = new Date(year, month + 1, 0);
   const startIdx = first.getDay();
   const days = last.getDate();
-  const cells = Array(startIdx)
-    .fill(null)
-    .concat(Array.from({ length: days }, (_, i) => new Date(year, month, i + 1)));
+  const cells = Array(startIdx).fill(null).concat(Array.from({ length: days }, (_, i) => new Date(year, month, i + 1)));
   while (cells.length % 7 !== 0) cells.push(null);
   return { year, month, grid: cells };
 }
