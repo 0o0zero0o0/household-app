@@ -1,3 +1,4 @@
+// src/App.js
 import React, { useMemo, useState, useEffect } from "react";
 import { db } from "./firebase";
 import {
@@ -22,6 +23,7 @@ import {
 import "./App.css";
 
 export default function App() {
+  // --- auth ---
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     try {
       return typeof window !== "undefined" && localStorage.getItem("auth") === "1";
@@ -32,11 +34,13 @@ export default function App() {
   const [passwordInput, setPasswordInput] = useState("");
   const [passwordError, setPasswordError] = useState(false);
 
+  // --- UI modals ---
   const [openCalendar, setOpenCalendar] = useState(false);
   const [openList, setOpenList] = useState(false);
   const [openEom, setOpenEom] = useState(false);
   const [openAdd, setOpenAdd] = useState(false);
 
+  // --- data ---
   const [tx, setTx] = useState([]);
 
   async function loadTx() {
@@ -80,6 +84,7 @@ export default function App() {
     if (isAuthenticated) loadTx().catch(console.error);
   }, [isAuthenticated]);
 
+  // --- constants & computed ---
   const LIMITS = {
     jiyoung: { livingLimit: 120000, diningLimit: 50000 },
     jiwon: { livingLimit: 120000, diningLimit: 50000 },
@@ -113,17 +118,27 @@ export default function App() {
   if (spent.지원.외식 > LIMITS.jiwon.diningLimit)
     alerts.push("지원의 외식비가 한도를 초과했습니다.");
 
+  // --- login screen ---
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-sky-50 flex items-center justify-center p-4">
         <div className="w-full max-w-sm bg-white rounded-3xl shadow-2xl p-8 border-2 border-sky-100">
           <div className="flex justify-center mb-8">
-            <img
-              src="/logo.png"
-              alt="TwinWallet 로고"
-              className="h-10 w-auto"
-            />
+            {/* 로고 (조금 작게) */}
+            <svg className="h-8 w-auto" viewBox="0 0 212.429 32.202" xmlns="http://www.w3.org/2000/svg">
+              <path fill="#189EFF" d="m14.951,15.9h-4.229v15.791h-6.492v-15.791H0v-5.579h4.229V3.976h6.492v6.346h4.229v5.579Z"/>
+              <path fill="#189EFF" d="m51.489,10.321l-7.148,21.37h-6.527l-3.866-12.217-3.829,12.217h-6.491l-7.147-21.37h6.855l3.793,13.748,3.72-13.748h6.638l3.756,13.821,3.793-13.821h6.455Z"/>
+              <path fill="#189EFF" d="m61.657,3.976c0,2.297-1.678,3.975-3.975,3.975s-3.976-1.678-3.976-3.975,1.678-3.976,3.976-3.976,3.975,1.678,3.975,3.976Zm-.729,27.789h-6.491V10.321h6.491v21.443Z"/>
+              <path fill="#189EFF" d="m65.812,10.321h6.491v2.188c1.276-1.714,3.246-2.698,5.981-2.698,4.959,0,8.351,3.61,8.351,9.518v12.363h-6.491v-11.269c0-3.246-1.312-5.033-3.756-5.033-2.553,0-4.085,2.006-4.085,5.324v10.978h-6.491V10.321Z"/>
+              <path fill="#189EFF" d="m123.283,10.321l-7.148,21.37h-6.527l-3.866-12.217-3.829,12.217h-6.491l-7.147-21.37h6.855l3.793,13.748,3.72-13.748h6.638l3.756,13.821,3.793-13.821h6.455Z"/>
+              <path fill="#189EFF" d="m124.188,21.006c0-6.491,4.267-11.195,10.394-11.195,2.808,0,4.85.984,6.126,2.698v-2.188h6.492v21.37h-6.492v-2.188c-1.276,1.714-3.318,2.699-6.126,2.699-6.127,0-10.394-4.705-10.394-11.196Zm16.629,0c0-3.282-2.042-5.652-5.215-5.652-3.1,0-5.068,2.37-5.068,5.652s1.969,5.653,5.068,5.653c3.173,0,5.215-2.371,5.215-5.653Z"/>
+              <path fill="#189EFF" d="m158.573,31.691h-6.491V1.058h6.491v30.634Z"/>
+              <path fill="#189EFF" d="m169.949,31.691h-6.491V1.058h6.491v30.634Z"/>
+              <path fill="#189EFF" d="m173.74,21.006c0-6.491,4.595-11.195,11.123-11.195s11.122,4.668,11.122,11.195c0,.62-.036,1.313-.146,2.079h-15.645c.51,2.479,2.225,3.902,4.668,3.902,1.859,0,3.392-.657,3.938-1.678h6.527c-1.094,4.084-5.288,6.893-10.466,6.893-6.528,0-11.123-4.668-11.123-11.196Zm15.9-2.115c-.548-2.553-2.225-3.938-4.777-3.938s-4.158,1.386-4.705,3.938h9.482Z"/>
+              <path fill="#189EFF" d="m212.429,15.9h-4.229v15.791h-6.492v-15.791h-4.23v-5.579h4.23V3.976h6.492v6.346h4.229v5.579Z"/>
+            </svg>
           </div>
+
           <h2 className="text-xl font-bold text-center text-gray-800 mb-2">
             🔐 환영합니다!
           </h2>
@@ -165,49 +180,59 @@ export default function App() {
     );
   }
 
+  // --- main screen ---
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-sky-50 text-gray-900 flex items-start justify-center p-4 pt-5">
-      <div className="w-full max-w-md flex flex-col items-center gap-5">
-
-        {/* 상단바 (프레임 없는 버전) */}
-        <div className="w-full relative flex items-center justify-between px-3 pt-2">
-          <button
-            aria-label="내 기록 목록"
-            onClick={() => setOpenList(true)}
-            className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-sky-50 hover:bg-sky-100 transition text-sky-600"
-          >
-            <List className="w-4 h-4" />
-          </button>
-
-          <div className="absolute left-1/2 -translate-x-1/2">
-            <div className="bg-[#189EFF] rounded-lg p-1.5 shadow-sm">
-              <img
-                src="/logo.png"
-                alt="TwinWallet 로고"
-                className="h-5 md:h-6 w-auto"
-              />
-            </div>
-          </div>
-
-          <div className="flex items-center gap-1.5">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-sky-50 text-gray-900 flex items-start justify-center p-4 pt-4">
+      <div className="w-full max-w-md flex flex-col items-center gap-4">
+        {/* 상단바: 프레임(배경/테두리/그림자) 제거 & 요소 축소 */}
+        <div className="w-full relative flex items-center justify-between px-1 pt-1">
+          {/* 왼쪽: 플러스 + 목록 (아이콘 크기 축소) */}
+          <div className="flex items-center gap-1">
             <button
               aria-label="내역 작성"
               onClick={() => setOpenAdd(true)}
-              className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-sky-400 to-blue-500 hover:from-sky-500 hover:to-blue-600 transition text-white shadow-sm"
+              className="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-gradient-to-br from-sky-400 to-blue-500 hover:from-sky-500 hover:to-blue-600 transition text-white shadow-sm active:scale-95"
             >
               <Plus className="w-4 h-4" />
             </button>
             <button
+              aria-label="내 기록 목록"
+              onClick={() => setOpenList(true)}
+              className="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-sky-50 hover:bg-sky-100 transition text-sky-600"
+            >
+              <List className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* 중앙: 로고 더 작게 (절대 중앙) */}
+          <div className="absolute left-1/2 -translate-x-1/2">
+            <svg className="h-6 w-auto" viewBox="0 0 212.429 32.202" xmlns="http://www.w3.org/2000/svg">
+              <path fill="#189EFF" d="m14.951,15.9h-4.229v15.791h-6.492v-15.791H0v-5.579h4.229V3.976h6.492v6.346h4.229v5.579Z"/>
+              <path fill="#189EFF" d="m51.489,10.321l-7.148,21.37h-6.527l-3.866-12.217-3.829,12.217h-6.491l-7.147-21.37h6.855l3.793,13.748,3.72-13.748h6.638l3.756,13.821,3.793-13.821h6.455Z"/>
+              <path fill="#189EFF" d="m61.657,3.976c0,2.297-1.678,3.975-3.975,3.975s-3.976-1.678-3.976-3.975,1.678-3.976,3.976-3.976,3.975,1.678,3.975,3.976Zm-.729,27.789h-6.491V10.321h6.491v21.443Z"/>
+              <path fill="#189EFF" d="m65.812,10.321h6.491v2.188c1.276-1.714,3.246-2.698,5.981-2.698,4.959,0,8.351,3.61,8.351,9.518v12.363h-6.491v-11.269c0-3.246-1.312-5.033-3.756-5.033-2.553,0-4.085,2.006-4.085,5.324v10.978h-6.491V10.321Z"/>
+              <path fill="#189EFF" d="m123.283,10.321l-7.148,21.37h-6.527l-3.866-12.217-3.829,12.217h-6.491l-7.147-21.37h6.855l3.793,13.748,3.72-13.748h6.638l3.756,13.821,3.793-13.821h6.455Z"/>
+              <path fill="#189EFF" d="m124.188,21.006c0-6.491,4.267-11.195,10.394-11.195,2.808,0,4.85.984,6.126,2.698v-2.188h6.492v21.37h-6.492v-2.188c-1.276,1.714-3.318,2.699-6.126,2.699-6.127,0-10.394-4.705-10.394-11.196Zm16.629,0c0-3.282-2.042-5.652-5.215-5.652-3.1,0-5.068,2.37-5.068,5.652s1.969,5.653,5.068,5.653c3.173,0,5.215-2.371,5.215-5.653Z"/>
+              <path fill="#189EFF" d="m158.573,31.691h-6.491V1.058h6.491v30.634Z"/>
+              <path fill="#189EFF" d="m169.949,31.691h-6.491V1.058h6.491v30.634Z"/>
+              <path fill="#189EFF" d="m173.74,21.006c0-6.491,4.595-11.195,11.123-11.195s11.122,4.668,11.122,11.195c0,.62-.036,1.313-.146,2.079h-15.645c.51,2.479,2.225,3.902,4.668,3.902,1.859,0,3.392-.657,3.938-1.678h6.527c-1.094,4.084-5.288,6.893-10.466,6.893-6.528,0-11.123-4.668-11.123-11.196Zm15.9-2.115c-.548-2.553-2.225-3.938-4.777-3.938s-4.158,1.386-4.705,3.938h9.482Z"/>
+              <path fill="#189EFF" d="m212.429,15.9h-4.229v15.791h-6.492v-15.791h-4.23v-5.579h4.23V3.976h6.492v6.346h4.229v5.579Z"/>
+            </svg>
+          </div>
+
+          {/* 오른쪽: 달력/로그아웃 (축소) */}
+          <div className="flex items-center gap-1">
+            <button
               aria-label="달력 열기"
               onClick={() => setOpenCalendar(true)}
-              className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-sky-50 hover:bg-sky-100 transition text-sky-600"
+              className="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-sky-50 hover:bg-sky-100 transition text-sky-600"
             >
               <Calendar className="w-4 h-4" />
             </button>
             <button
               aria-label="로그아웃"
               onClick={logout}
-              className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-red-50 hover:bg-red-100 transition text-red-500"
+              className="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-red-50 hover:bg-red-100 transition text-red-500"
               title="로그아웃"
             >
               <LogOut className="w-3.5 h-3.5" />
@@ -215,7 +240,7 @@ export default function App() {
           </div>
         </div>
 
-        {/* 나머지 기존 카드/기능 그대로 */}
+        {/* 알림 */}
         {alerts.length > 0 && (
           <div className="w-full bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-200 text-amber-800 p-4 rounded-2xl shadow-sm">
             <div className="flex items-center gap-2 mb-2">
@@ -230,6 +255,7 @@ export default function App() {
           </div>
         )}
 
+        {/* 사용자 카드 */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
           <UserCard
             name="지영"
@@ -238,6 +264,9 @@ export default function App() {
             dining={spent.지영.외식}
             diningLimit={LIMITS.jiyoung.diningLimit}
           />
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full -mt-2">
           <UserCard
             name="지원"
             living={spent.지원.생활}
@@ -247,6 +276,7 @@ export default function App() {
           />
         </div>
 
+        {/* 액션 */}
         <div className="w-full flex flex-col gap-3">
           <ActionCard
             icon={<PieChart className="w-5 h-5" />}
@@ -255,21 +285,29 @@ export default function App() {
           />
         </div>
       </div>
+
+      {/* 모달들 */}
+      {openCalendar && <CalendarModal onClose={() => setOpenCalendar(false)} tx={tx} />}
+      {openList && <ListModal onClose={() => setOpenList(false)} tx={tx} />}
+      {openEom && <EomSummaryModal onClose={() => setOpenEom(false)} tx={tx} />}
+      {openAdd && <AddTxModal onClose={() => setOpenAdd(false)} onSubmit={addTx} />}
     </div>
   );
 }
+
+/* -------------------------- 하위 컴포넌트들 -------------------------- */
 
 function UserCard({ name, living, livingLimit, dining, diningLimit }) {
   const leftLiving = Math.max(0, livingLimit - living);
   const leftDining = Math.max(0, diningLimit - dining);
 
   return (
-    <div className="bg-white shadow-md border-2 border-sky-100 rounded-2xl p-5 hover:shadow-lg transition">
-      <h3 className="text-lg font-bold mb-3 text-sky-600">💙 {name}</h3>
+    <div className="bg-white shadow-md border-2 border-sky-100 rounded-2xl p-4 hover:shadow-lg transition">
+      <h3 className="text-base font-bold mb-3 text-sky-600">💙 {name}</h3>
       <div className="mb-4">
         <div className="flex items-center gap-2 text-sky-600 mb-2">
-          <div className="w-7 h-7 bg-sky-50 rounded-lg flex items-center justify-center">
-            <Wallet className="w-4 h-4" />
+          <div className="w-6 h-6 bg-sky-50 rounded-lg flex items-center justify-center">
+            <Wallet className="w-3.5 h-3.5" />
           </div>
           <span className="text-sm font-semibold">생활비</span>
         </div>
@@ -283,8 +321,8 @@ function UserCard({ name, living, livingLimit, dining, diningLimit }) {
       </div>
       <div>
         <div className="flex items-center gap-2 text-orange-500 mb-2">
-          <div className="w-7 h-7 bg-orange-50 rounded-lg flex items-center justify-center">
-            <Utensils className="w-4 h-4" />
+          <div className="w-6 h-6 bg-orange-50 rounded-lg flex items-center justify-center">
+            <Utensils className="w-3.5 h-3.5" />
           </div>
           <span className="text-sm font-semibold">외식비</span>
         </div>
@@ -308,7 +346,7 @@ function ProgressBar({ value, color = "sky" }) {
       : "bg-gradient-to-r from-orange-400 to-red-500";
 
   return (
-    <div className={`h-3 w-full ${bgColor} rounded-full overflow-hidden shadow-inner`}>
+    <div className={`h-2.5 w-full ${bgColor} rounded-full overflow-hidden shadow-inner`}>
       <div
         className={`h-full ${barColor} transition-all duration-500 rounded-full`}
         style={{ width: `${Math.min(100, Math.max(0, value))}%` }}
@@ -321,9 +359,9 @@ function ActionCard({ icon, text, onClick }) {
   return (
     <button
       onClick={onClick}
-      className="flex items-center gap-3 px-5 py-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl border-2 border-purple-100 text-left hover:from-purple-100 hover:to-pink-100 hover:shadow-md transition"
+      className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl border-2 border-purple-100 text-left hover:from-purple-100 hover:to-pink-100 hover:shadow-md transition"
     >
-      <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-purple-500 shadow-sm">
+      <div className="w-9 h-9 bg-white rounded-xl flex items-center justify-center text-purple-500 shadow-sm">
         {icon}
       </div>
       <p className="text-gray-800 text-sm font-semibold">{text}</p>
@@ -335,7 +373,6 @@ function CalendarModal({ onClose, tx }) {
   const today = new Date();
   const [cursor, setCursor] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
   const [selected, setSelected] = useState(formatDate(today));
-
   const { year, month, grid } = useMemo(() => buildMonthGrid(cursor), [cursor]);
   const daily = useMemo(() => summarizeByDate(tx), [tx]);
 
@@ -344,14 +381,11 @@ function CalendarModal({ onClose, tx }) {
       <div className="w-full max-w-sm bg-white rounded-3xl shadow-2xl overflow-hidden border-2 border-sky-100">
         <div className="flex items-center justify-between px-5 py-4 border-b bg-gradient-to-r from-sky-50 to-blue-50">
           <div className="font-bold text-sky-700">📅 달력</div>
-          <button
-            aria-label="닫기"
-            onClick={onClose}
-            className="w-9 h-9 grid place-items-center rounded-xl hover:bg-white transition"
-          >
+          <button aria-label="닫기" onClick={onClose} className="w-9 h-9 grid place-items-center rounded-xl hover:bg-white transition">
             <X className="w-5 h-5" />
           </button>
         </div>
+
         <div className="p-5">
           <div className="flex items-center justify-between mb-4">
             <button
@@ -389,9 +423,7 @@ function CalendarModal({ onClose, tx }) {
                   key={idx}
                   onClick={() => setSelected(iso)}
                   className={`h-11 rounded-xl text-sm relative border-2 transition font-medium ${
-                    isSelected
-                      ? "border-sky-400 bg-sky-50 text-sky-700 shadow-sm"
-                      : "border-transparent hover:bg-gray-50"
+                    isSelected ? "border-sky-400 bg-sky-50 text-sky-700 shadow-sm" : "border-transparent hover:bg-gray-50"
                   }`}
                 >
                   <div className="flex items-center justify-center h-full">
@@ -422,7 +454,7 @@ function CalendarModal({ onClose, tx }) {
   );
 }
 
-function ListModal({ onClose, tx, onEdit }) {
+function ListModal({ onClose, tx }) {
   const today = new Date();
   const [who, setWho] = useState("all");
   const [period, setPeriod] = useState("week");
@@ -455,14 +487,11 @@ function ListModal({ onClose, tx, onEdit }) {
       <div className="w-full max-w-sm bg-white rounded-3xl shadow-2xl overflow-hidden border-2 border-sky-100">
         <div className="flex items-center justify-between px-5 py-4 border-b bg-gradient-to-r from-sky-50 to-blue-50">
           <div className="font-bold text-sky-700">📋 내 기록 목록</div>
-          <button
-            aria-label="닫기"
-            onClick={onClose}
-            className="w-9 h-9 grid place-items-center rounded-xl hover:bg-white transition"
-          >
+          <button aria-label="닫기" onClick={onClose} className="w-9 h-9 grid place-items-center rounded-xl hover:bg-white transition">
             <X className="w-5 h-5" />
           </button>
         </div>
+
         <div className="p-5 space-y-4 text-sm">
           <div>
             <div className="text-xs font-semibold text-gray-600 mb-2">이름</div>
@@ -517,35 +546,19 @@ function ListModal({ onClose, tx, onEdit }) {
           </div>
 
           <div className="border-2 border-sky-100 rounded-2xl divide-y divide-sky-100 max-h-72 overflow-auto">
-            {rows.length === 0 && (
-              <div className="p-4 text-center text-gray-400">해당 기간 내 기록 없음</div>
-            )}
+            {rows.length === 0 && <div className="p-4 text-center text-gray-400">해당 기간 내 기록 없음</div>}
             {rows.map((r, i) => (
-              <div
-                key={i}
-                className="p-3 grid grid-cols-[88px_1fr_auto_auto] items-center gap-3 hover:bg-sky-50 transition"
-              >
+              <div key={i} className="p-4 grid grid-cols-[88px_1fr_auto] items-center gap-3 hover:bg-sky-50 transition">
                 <div className="text-gray-500 text-xs font-medium">
                   {String(r.date).replaceAll("-", ".")}
                 </div>
                 <div className="text-xs">
                   <span className="text-sky-600 font-semibold mr-1">{r.user}</span>
-                  <span className="text-gray-700">
-                    {r.place} — {r.item}
-                  </span>
+                  <span className="text-gray-700">{r.place} — {r.item}</span>
                 </div>
-                <div className="font-bold text-sky-700 whitespace-nowrap">
+                <div className="font-bold text-sky-700">
                   ₩{Number(r.amount).toLocaleString("ko-KR")}
                 </div>
-                <button
-                  aria-label="수정"
-                  onClick={() => onEdit(r)}
-                  className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs rounded-lg border border-sky-200 text-sky-600 hover:bg-sky-50"
-                  title="수정"
-                >
-                  <Pencil className="w-3.5 h-3.5" />
-                  수정
-                </button>
               </div>
             ))}
           </div>
@@ -582,19 +595,17 @@ function EomSummaryModal({ onClose, tx }) {
       <div className="w-full max-w-sm bg-white rounded-3xl shadow-2xl overflow-hidden border-2 border-purple-100">
         <div className="flex items-center justify-between px-5 py-4 border-b bg-gradient-to-r from-purple-50 to-pink-50">
           <div className="font-bold text-purple-700">📊 월말 요약</div>
-          <button
-            aria-label="닫기"
-            onClick={onClose}
-            className="w-9 h-9 grid place-items-center rounded-xl hover:bg-white transition"
-          >
+          <button aria-label="닫기" onClick={onClose} className="w-9 h-9 grid place-items-center rounded-xl hover:bg-white transition">
             <X className="w-5 h-5" />
           </button>
         </div>
+
         <div className="p-5 text-sm space-y-4">
           <div className="flex items-center justify-between font-bold text-lg bg-gradient-to-r from-sky-50 to-blue-50 p-4 rounded-2xl border-2 border-sky-200">
             <span>💸 이번 달 총 사용</span>
             <span className="text-sky-600">₩{totals.total.toLocaleString("ko-KR")}</span>
           </div>
+
           <div className="grid grid-cols-2 gap-3">
             <div className="border-2 border-sky-100 rounded-2xl p-4 bg-sky-50">
               <div className="font-bold mb-3 text-sky-700">👥 사용자별</div>
@@ -607,6 +618,7 @@ function EomSummaryModal({ onClose, tx }) {
                 <span className="font-semibold">₩{totals.byUser.지원.toLocaleString("ko-KR")}</span>
               </div>
             </div>
+
             <div className="border-2 border-orange-100 rounded-2xl p-4 bg-orange-50">
               <div className="font-bold mb-3 text-orange-700">📑 카테고리별</div>
               <div className="flex items-center justify-between mb-2">
@@ -619,6 +631,7 @@ function EomSummaryModal({ onClose, tx }) {
               </div>
             </div>
           </div>
+
           <div className="border-2 border-purple-100 rounded-2xl p-4 bg-purple-50">
             <div className="font-bold mb-3 text-purple-700">🏆 어디서 많이 썼나요? (Top 3)</div>
             {topPlaces.length === 0 && <div className="text-gray-400 text-center py-2">데이터 없음</div>}
@@ -672,11 +685,7 @@ function AddTxModal({ onClose, onSubmit }) {
       <div className="w-full max-w-sm bg-white rounded-3xl shadow-2xl overflow-hidden border-2 border-sky-100">
         <div className="flex items-center justify-between px-5 py-4 border-b bg-gradient-to-r from-sky-50 to-blue-50">
           <div className="font-bold text-sky-700">✏️ 내역 작성</div>
-          <button
-            aria-label="닫기"
-            onClick={onClose}
-            className="w-9 h-9 grid place-items-center rounded-xl hover:bg-white transition"
-          >
+          <button aria-label="닫기" onClick={onClose} className="w-9 h-9 grid place-items-center rounded-xl hover:bg-white transition">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -774,137 +783,6 @@ function AddTxModal({ onClose, onSubmit }) {
   );
 }
 
-function EditTxModal({ initial, onClose, onSubmit }) {
-  const [form, setForm] = useState({
-    date: String(initial.date || ""),
-    user: initial.user || "지영",
-    category: initial.category || "생활",
-    place: initial.place || "",
-    item: initial.item || "",
-    amount: initial.amount ?? "",
-  });
-
-  const canSubmit =
-    form.date &&
-    form.user &&
-    form.category &&
-    form.place.trim() &&
-    form.item.trim() &&
-    String(form.amount).trim() !== "" &&
-    !Number.isNaN(Number(form.amount));
-
-  const handleChange = (k, v) => setForm((f) => ({ ...f, [k]: v }));
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!canSubmit) return;
-    await onSubmit({ ...form, amount: Number(form.amount) || 0 });
-  };
-
-  return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-      <div className="w-full max-w-sm bg-white rounded-3xl shadow-2xl overflow-hidden border-2 border-sky-100">
-        <div className="flex items-center justify-between px-5 py-4 border-b bg-gradient-to-r from-sky-50 to-blue-50">
-          <div className="font-bold text-sky-700">🛠 내역 수정</div>
-          <button
-            aria-label="닫기"
-            onClick={onClose}
-            className="w-9 h-9 grid place-items-center rounded-xl hover:bg-white transition"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit} className="p-5 space-y-4 text-sm">
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <div className="text-xs font-semibold text-gray-600 mb-2">날짜</div>
-              <input
-                type="date"
-                value={form.date}
-                onChange={(e) => handleChange("date", e.target.value)}
-                className="w-full border-2 border-sky-200 rounded-xl px-3 py-2 focus:border-sky-400 focus:ring-2 focus:ring-sky-200 outline-none"
-              />
-            </div>
-            <div>
-              <div className="text-xs font-semibold text-gray-600 mb-2">사용자</div>
-              <div className="flex items-center gap-2">
-                <label className="inline-flex items-center gap-1 px-3 py-2 bg-sky-50 rounded-xl cursor-pointer hover:bg-sky-100 transition text-xs">
-                  <input type="radio" checked={form.user === "지영"} onChange={() => handleChange("user", "지영")} />
-                  지영
-                </label>
-                <label className="inline-flex items-center gap-1 px-3 py-2 bg-sky-50 rounded-xl cursor-pointer hover:bg-sky-100 transition text-xs">
-                  <input type="radio" checked={form.user === "지원"} onChange={() => handleChange("user", "지원")} />
-                  지원
-                </label>
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <div className="text-xs font-semibold text-gray-600 mb-2">카테고리</div>
-            <div className="flex items-center gap-2">
-              <label className="inline-flex items-center gap-2 px-4 py-2 bg-sky-50 rounded-xl cursor-pointer hover:bg-sky-100 transition">
-                <input type="radio" checked={form.category === "생활"} onChange={() => handleChange("category", "생활")} />
-                생활
-              </label>
-              <label className="inline-flex items-center gap-2 px-4 py-2 bg-orange-50 rounded-xl cursor-pointer hover:bg-orange-100 transition">
-                <input type="radio" checked={form.category === "외식"} onChange={() => handleChange("category", "외식")} />
-                외식
-              </label>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <div className="text-xs font-semibold text-gray-600 mb-2">사용처</div>
-              <input
-                type="text"
-                value={form.place}
-                onChange={(e) => handleChange("place", e.target.value)}
-                className="w-full border-2 border-sky-200 rounded-xl px-3 py-2 focus:border-sky-400 focus:ring-2 focus:ring-sky-200 outline-none"
-              />
-            </div>
-            <div>
-              <div className="text-xs font-semibold text-gray-600 mb-2">구매 물건</div>
-              <input
-                type="text"
-                value={form.item}
-                onChange={(e) => handleChange("item", e.target.value)}
-                className="w-full border-2 border-sky-200 rounded-xl px-3 py-2 focus:border-sky-400 focus:ring-2 focus:ring-sky-200 outline-none"
-              />
-            </div>
-          </div>
-
-          <div>
-            <div className="text-xs font-semibold text-gray-600 mb-2">금액(원)</div>
-            <input
-              type="number"
-              min={0}
-              inputMode="numeric"
-              value={form.amount}
-              onChange={(e) => handleChange("amount", e.target.value)}
-              className="w-full border-2 border-sky-200 rounded-xl px-3 py-2 focus:border-sky-400 focus:ring-2 focus:ring-sky-200 outline-none text-lg font-semibold"
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={!canSubmit}
-            className={`w-full py-3 rounded-2xl text-white font-bold transition shadow-lg ${
-              canSubmit
-                ? "bg-gradient-to-r from-sky-400 to-blue-500 hover:from-sky-500 hover:to-blue-600 hover:shadow-xl transform hover:scale-[1.02]"
-                : "bg-gray-300 cursor-not-allowed"
-            }`}
-          >
-            ✅ 수정 저장
-          </button>
-        </form>
-      </div>
-    </div>
-  );
-}
-
 function DateBreakdown({ selected, tx }) {
   const filtered = tx.filter((t) => String(t.date) === selected);
   const totalBy = filtered.reduce(
@@ -934,7 +812,7 @@ function DateBreakdown({ selected, tx }) {
   );
 }
 
-/* ---------- Helpers ---------- */
+/* ------------------------------ utils ------------------------------ */
 function sameDate(a, b) {
   return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 }
@@ -967,7 +845,7 @@ function summarizeByDate(tx) {
   return map;
 }
 function getWeekStart(d) {
-  const day = (d.getDay() + 6) % 7;
+  const day = (d.getDay() + 6) % 7; // 월요일 시작
   const s = new Date(d);
   s.setDate(d.getDate() - day);
   return s;
