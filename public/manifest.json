@@ -1,12 +1,22 @@
 {
   "name": "TwinWallet",
   "short_name": "TwinWallet",
-  "start_url": "/?v=5",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#189EFF",
   "icons": [
-    { "src": "/twinwallet-192.png?v=5", "sizes": "192x192", "type": "image/png" },
-    { "src": "/twinwallet-512.png?v=5", "sizes": "512x512", "type": "image/png" }
+    {
+      "src": "/app-icon-192-v2.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/app-icon-512-v2.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
   ]
 }
