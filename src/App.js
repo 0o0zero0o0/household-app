@@ -267,9 +267,6 @@ export default function App() {
             <Logo color="#189EFF" />
           </div>
 
-          <h2 style={{ textAlign: "center", fontWeight: 800, color: "#111827", marginBottom: 4 }}>
-            🔐 환영합니다!
-          </h2>
           <p style={{ textAlign: "center", color: "#6b7280", marginBottom: 16 }}>
             비밀번호를 입력해주세요
           </p>
