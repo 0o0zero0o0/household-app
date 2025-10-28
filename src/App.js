@@ -13,7 +13,7 @@ import {
   updateDoc,
 } from "firebase/firestore";
 
-/* ------------------------------ 심플 아이콘 ------------------------------ */
+/* =============== 공용 아이콘 =============== */
 function Icon({ name, size = 16 }) {
   const common = {
     width: size,
@@ -92,7 +92,7 @@ function Icon({ name, size = 16 }) {
   return null;
 }
 
-/* ------------------------------ 로고 ------------------------------ */
+/* =============== 로고 =============== */
 function Logo({ className = "", color = "#189EFF" }) {
   return (
     <svg
@@ -100,6 +100,7 @@ function Logo({ className = "", color = "#189EFF" }) {
       xmlns="http://www.w3.org/2000/svg"
       className={className}
       aria-label="TwinWallet logo"
+      style={{ height: 24 }}
     >
       <g fill={color}>
         <path d="m41.372,12.494h-15.398v38.004h-10.575V12.494H0V3.141h41.372v9.353Z" />
@@ -117,14 +118,12 @@ function Logo({ className = "", color = "#189EFF" }) {
   );
 }
 
-/* ------------------------------ App ------------------------------ */
+/* =============== App =============== */
 export default function App() {
   /* auth */
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     try {
-      return (
-        typeof window !== "undefined" && localStorage.getItem("auth") === "1"
-      );
+      return typeof window !== "undefined" && localStorage.getItem("auth") === "1";
     } catch {
       return false;
     }
@@ -160,21 +159,31 @@ export default function App() {
 
   async function deleteTx(id) {
     if (!window.confirm("정말 삭제하시겠습니까?")) return;
-    await deleteDoc(doc(db, "tx", id));
-    await loadTx();
+    try {
+      await deleteDoc(doc(db, "tx", id));
+      await loadTx();
+    } catch (err) {
+      console.error("삭제 실패:", err);
+      alert("삭제에 실패했습니다.");
+    }
   }
 
   async function updateTx(id, record) {
-    await updateDoc(doc(db, "tx", id), {
-      ...record,
-      amount: Number(record.amount) || 0,
-    });
-    await loadTx();
+    try {
+      await updateDoc(doc(db, "tx", id), {
+        ...record,
+        amount: Number(record.amount) || 0,
+      });
+      await loadTx();
+    } catch (err) {
+      console.error("수정 실패:", err);
+      alert("수정에 실패했습니다.");
+    }
   }
 
   const handlePasswordSubmit = (e) => {
     e.preventDefault();
-    if (passwordInput === "!0121") {
+    if (passwordInput === "0121") {
       setIsAuthenticated(true);
       try {
         localStorage.setItem("auth", "1");
@@ -207,10 +216,7 @@ export default function App() {
 
   const monthKey = useMemo(() => {
     const now = new Date();
-    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(
-      2,
-      "0"
-    )}`;
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
   }, []);
 
   const spent = useMemo(() => {
@@ -237,53 +243,85 @@ export default function App() {
   /* 로그인 화면 */
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen via-white bg-gradient-to-br from-blue-50 to-sky-50 flex items-center justify-center p-4">
+      <div
+        style={{
+          minHeight: "100vh",
+          background: "linear-gradient(135deg,#eff6ff,#ffffff,#e0f2fe)",
+          display: "grid",
+          placeItems: "center",
+          padding: 16,
+        }}
+      >
         <div
-          className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-24 border-2"
-          style={{ padding: "2rem" }}
+          style={{
+            width: "100%",
+            maxWidth: 420,
+            background: "#fff",
+            borderRadius: 24,
+            boxShadow: "0 12px 32px rgba(2,132,199,.12)",
+            border: "2px solid #bae6fd",
+            padding: 24,
+          }}
         >
-          <div className="flex justify-center" style={{ marginBottom: "1.5rem" }}>
-            <Logo className="" color="#189EFF" />
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
+            <Logo color="#189EFF" />
           </div>
 
-          <h2
-            className="text-center text-lg font-bold text-gray-800"
-            style={{ marginBottom: ".25rem" }}
-          >
+          <h2 style={{ textAlign: "center", fontWeight: 800, color: "#111827", marginBottom: 4 }}>
             🔐 환영합니다!
           </h2>
-          <p
-            className="text-center text-sm text-gray-500"
-            style={{ marginBottom: "1rem" }}
-          >
+          <p style={{ textAlign: "center", color: "#6b7280", marginBottom: 16 }}>
             비밀번호를 입력해주세요
           </p>
 
-          <form onSubmit={handlePasswordSubmit} className="space-y-4">
+          <form onSubmit={handlePasswordSubmit}>
             <div>
               <input
                 type="password"
                 value={passwordInput}
                 onChange={(e) => setPasswordInput(e.target.value)}
                 placeholder="••••••"
-                className="input"
                 autoFocus
+                style={{
+                  width: "100%",
+                  padding: "12px 14px",
+                  border: `2px solid ${passwordError ? "#fecaca" : "#bae6fd"}`,
+                  borderRadius: 14,
+                  outline: "none",
+                }}
               />
               {passwordError && (
                 <p
-                  className="text-red-500 text-sm"
                   style={{
+                    color: "#ef4444",
+                    fontSize: 12,
                     display: "flex",
                     alignItems: "center",
-                    gap: "6px",
-                    marginTop: "8px",
+                    gap: 6,
+                    marginTop: 8,
                   }}
                 >
-                  <Icon name="alert" size={16} /> 비밀번호가 올바르지 않습니다
+                  <Icon name="alert" size={16} />
+                  비밀번호가 올바르지 않습니다
                 </p>
               )}
             </div>
-            <button type="submit" className="button" style={{ width: "100%" }}>
+
+            <button
+              type="submit"
+              style={{
+                width: "100%",
+                marginTop: 12,
+                background: "linear-gradient(90deg,#38bdf8,#3b82f6)",
+                color: "#fff",
+                fontWeight: 800,
+                padding: "12px 14px",
+                borderRadius: 14,
+                border: "none",
+                boxShadow: "0 6px 16px rgba(59,130,246,.25)",
+                cursor: "pointer",
+              }}
+            >
               확인
             </button>
           </form>
@@ -294,11 +332,21 @@ export default function App() {
 
   /* 메인 화면 */
   return (
-    <div className="min-h-screen via-white bg-gradient-to-br from-blue-50 to-sky-50 text-gray-900 flex items-start justify-center p-4 pt-4">
-      <div className="w-full max-w-md flex flex-col items-center gap-4">
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "linear-gradient(135deg,#eff6ff,#ffffff,#e0f2fe)",
+        color: "#111827",
+        display: "flex",
+        alignItems: "flex-start",
+        justifyContent: "center",
+        padding: 16,
+        paddingTop: 16,
+      }}
+    >
+      <div style={{ width: "100%", maxWidth: 420, display: "flex", flexDirection: "column", gap: 16 }}>
         {/* 상단바 */}
         <div
-          className="w-full"
           style={{
             position: "relative",
             display: "flex",
@@ -307,40 +355,43 @@ export default function App() {
             padding: "4px 4px 0",
           }}
         >
-          <div className="flex items-center gap-1">
+          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
             <button
               aria-label="내역 작성"
               onClick={() => setOpenAdd(true)}
-              className="iconbtn primary"
+              title="내역 작성"
+              style={styles.iconBtnPrimary}
             >
               <Icon name="plus" />
             </button>
             <button
               aria-label="내 기록 목록"
               onClick={() => setOpenList(true)}
-              className="iconbtn ghost"
+              title="내 기록 목록"
+              style={styles.iconBtnGhost}
             >
               <Icon name="list" />
             </button>
           </div>
 
           <div style={{ position: "absolute", left: "50%", transform: "translateX(-50%)" }}>
-            <Logo className="" color="#189EFF" />
+            <Logo color="#189EFF" />
           </div>
 
-          <div className="flex items-center gap-1">
+          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
             <button
               aria-label="달력 열기"
               onClick={() => setOpenCalendar(true)}
-              className="iconbtn ghost"
+              title="달력 열기"
+              style={styles.iconBtnGhost}
             >
               <Icon name="calendar" />
             </button>
             <button
               aria-label="로그아웃"
               onClick={logout}
-              className="iconbtn danger"
               title="로그아웃"
+              style={styles.iconBtnDanger}
             >
               <Icon name="logout" />
             </button>
@@ -350,10 +401,16 @@ export default function App() {
         {/* 알림 */}
         {alerts.length > 0 && (
           <div
-            className="w-full bg-white rounded-2xl border-2 shadow-md"
-            style={{ padding: "16px", borderColor: "#fde68a" }}
+            style={{
+              width: "100%",
+              background: "#fff",
+              borderRadius: 20,
+              border: "2px solid #fde68a",
+              boxShadow: "0 8px 24px rgba(0,0,0,.04)",
+              padding: 16,
+            }}
           >
-            <div className="flex items-center gap-2" style={{ marginBottom: "8px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
               <div
                 style={{
                   width: 32,
@@ -362,14 +419,15 @@ export default function App() {
                   borderRadius: 999,
                   display: "grid",
                   placeItems: "center",
+                  color: "#b45309",
                 }}
               >
                 <Icon name="alert" />
               </div>
-              <strong className="text-base">알림</strong>
+              <strong style={{ fontSize: 15 }}>알림</strong>
             </div>
             {alerts.map((a, i) => (
-              <p key={i} className="text-sm" style={{ marginLeft: "40px" }}>
+              <p key={i} style={{ marginLeft: 40, fontSize: 13, color: "#7c2d12" }}>
                 • {a}
               </p>
             ))}
@@ -377,35 +435,31 @@ export default function App() {
         )}
 
         {/* 사용자 카드 */}
-        <div className="w-full" style={{ display: "grid", gridTemplateColumns: "1fr", gap: "16px" }}>
-          <UserCard
-            name="지영"
-            living={spent.지영.생활}
-            livingLimit={LIMITS.jiyoung.livingLimit}
-            dining={spent.지영.외식}
-            diningLimit={LIMITS.jiyoung.diningLimit}
-          />
-        </div>
-        <div
-          className="w-full"
-          style={{ display: "grid", gridTemplateColumns: "1fr", gap: "16px", marginTop: "-8px" }}
-        >
-          <UserCard
-            name="지원"
-            living={spent.지원.생활}
-            livingLimit={LIMITS.jiwon.livingLimit}
-            dining={spent.지원.외식}
-            diningLimit={LIMITS.jiwon.diningLimit}
-          />
-        </div>
+        <UserCard
+          name="지영"
+          living={spent.지영.생활}
+          livingLimit={LIMITS.jiyoung.livingLimit}
+          dining={spent.지영.외식}
+          diningLimit={LIMITS.jiyoung.diningLimit}
+        />
+        <UserCard
+          name="지원"
+          living={spent.지원.생활}
+          livingLimit={LIMITS.jiwon.livingLimit}
+          dining={spent.지원.외식}
+          diningLimit={LIMITS.jiwon.diningLimit}
+        />
 
         {/* 액션 */}
-        <div className="w-full" style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-          <ActionCard icon={<Icon name="pie" />} text="월말 요약 보기" onClick={() => setOpenEom(true)} />
-        </div>
+        <button onClick={() => setOpenEom(true)} style={styles.actionCard}>
+          <div style={styles.actionIcon}>
+            <Icon name="pie" />
+          </div>
+          <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: "#1f2937" }}>월말 요약 보기</p>
+        </button>
       </div>
 
-      {/* 모달 */}
+      {/* 모달들 */}
       {openCalendar && <CalendarModal onClose={() => setOpenCalendar(false)} tx={tx} />}
       {openList && (
         <ListModal
@@ -434,68 +488,46 @@ export default function App() {
   );
 }
 
-/* -------------------------- 하위 컴포넌트 -------------------------- */
+/* =============== 하위 컴포넌트 =============== */
+
 function UserCard({ name, living, livingLimit, dining, diningLimit }) {
   const leftLiving = Math.max(0, livingLimit - living);
   const leftDining = Math.max(0, diningLimit - dining);
 
   return (
-    <div
-      className="bg-white shadow-md border-2 rounded-2xl"
-      style={{ padding: "16px", borderColor: "#bae6fd" }}
-    >
-      <h3 className="text-base font-bold" style={{ color: "#0284c7", marginBottom: "12px" }}>
+    <div style={styles.card}>
+      <h3 style={{ fontSize: 15, fontWeight: 800, margin: 0, marginBottom: 12, color: "#0284c7" }}>
         💙 {name}
       </h3>
 
-      <div style={{ marginBottom: "12px" }}>
-        <div className="flex items-center gap-2" style={{ color: "#0284c7", marginBottom: "8px" }}>
-          <div
-            style={{
-              width: 24,
-              height: 24,
-              background: "#f0f9ff",
-              borderRadius: 8,
-              display: "grid",
-              placeItems: "center",
-            }}
-          >
+      <div style={{ marginBottom: 12 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, color: "#0284c7", marginBottom: 8 }}>
+          <div style={styles.bulletIcon("#f0f9ff")}>
             <Icon name="wallet" size={14} />
           </div>
-          <span className="text-sm font-semibold">생활비</span>
+          <span style={{ fontSize: 13, fontWeight: 700 }}>생활비</span>
         </div>
         <ProgressBar value={(living / livingLimit) * 100} color="sky" />
-        <p className="text-xs text-gray-600" style={{ marginTop: "8px" }}>
+        <p style={{ fontSize: 12, color: "#4b5563", margin: "8px 0 0" }}>
           {living.toLocaleString()} / {livingLimit.toLocaleString()}원
         </p>
-        <p className="text-xs" style={{ color: "#16a34a", fontWeight: 700 }}>
+        <p style={{ fontSize: 12, color: "#16a34a", fontWeight: 800, margin: 0 }}>
           💰 남은 금액: {leftLiving.toLocaleString()}원
         </p>
       </div>
 
       <div>
-        <div className="flex items-center gap-2" style={{ color: "#ea580c", marginBottom: "8px" }}>
-          <div
-            style={{
-              width: 24,
-              height: 24,
-              background: "#fff7ed",
-              borderRadius: 8,
-              display: "grid",
-              placeItems: "center",
-            }}
-          >
+        <div style={{ display: "flex", alignItems: "center", gap: 8, color: "#ea580c", marginBottom: 8 }}>
+          <div style={styles.bulletIcon("#fff7ed")}>
             <Icon name="utensils" size={14} />
           </div>
+          <span style={{ fontSize: 13, fontWeight: 700 }}>외식비</span>
         </div>
-        <span className="text-sm font-semibold" style={{ color: "#ea580c" }}>
-          외식비
-        </span>
         <ProgressBar value={(dining / diningLimit) * 100} color="orange" />
-        <p className="text-xs text-gray-600" style={{ marginTop: "8px" }}>
+        <p style={{ fontSize: 12, color: "#4b5563", margin: "8px 0 0" }}>
           {dining.toLocaleString()} / {diningLimit.toLocaleString()}원
         </p>
-        <p className="text-xs" style={{ color: "#16a34a", fontWeight: 700 }}>
+        <p style={{ fontSize: 12, color: "#16a34a", fontWeight: 800, margin: 0 }}>
           💰 남은 금액: {leftDining.toLocaleString()}원
         </p>
       </div>
@@ -531,83 +563,38 @@ function ProgressBar({ value, color = "sky" }) {
   );
 }
 
-function ActionCard({ icon, text, onClick }) {
-  return (
-    <button
-      onClick={onClick}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: "12px",
-        padding: "12px 16px",
-        background: "linear-gradient(90deg,#faf5ff,#fdf2f8)",
-        borderRadius: "1rem",
-        border: "2px solid #e9d5ff",
-      }}
-    >
-      <div
-        style={{
-          width: 36,
-          height: 36,
-          background: "#fff",
-          color: "#8b5cf6",
-          borderRadius: 12,
-          display: "grid",
-          placeItems: "center",
-        }}
-      >
-        {icon}
-      </div>
-      <p className="text-sm font-semibold text-gray-800">{text}</p>
-    </button>
-  );
-}
-
-/* ------------------------------ 달력 모달 ------------------------------ */
+/* -------- 달력 모달 -------- */
 function CalendarModal({ onClose, tx }) {
   const today = new Date();
-  const [cursor, setCursor] = useState(
-    new Date(today.getFullYear(), today.getMonth(), 1)
-  );
+  const [cursor, setCursor] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
   const [selected, setSelected] = useState(formatDate(today));
   const { year, month, grid } = useMemo(() => buildMonthGrid(cursor), [cursor]);
   const daily = useMemo(() => summarizeByDate(tx), [tx]);
 
   return (
-    <div className="modal-overlay">
-      <div className="modal" style={{ maxWidth: 420 }}>
-        <div className="modal-head">
+    <div style={styles.modalOverlay}>
+      <div style={{ ...styles.modal, maxWidth: 420 }}>
+        <div style={styles.modalHead}>
           <div>📅 달력</div>
-          <button className="iconbtn" onClick={onClose}>
+          <button onClick={onClose} style={styles.iconBtn}>
             <Icon name="x" />
           </button>
         </div>
 
-        <div className="modal-body">
-          <div
-            className="flex items-center justify-between"
-            style={{ marginBottom: "12px" }}
-          >
+        <div style={styles.modalBody}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
             <button
-              className="btn-mini"
-              onClick={() =>
-                setCursor(
-                  new Date(cursor.getFullYear(), cursor.getMonth() - 1, 1)
-                )
-              }
+              style={styles.btnMini}
+              onClick={() => setCursor(new Date(cursor.getFullYear(), cursor.getMonth() - 1, 1))}
             >
               ◀
             </button>
-            <div className="font-bold text-lg">
+            <div style={{ fontWeight: 800, fontSize: 18 }}>
               {year}년 {month + 1}월
             </div>
             <button
-              className="btn-mini"
-              onClick={() =>
-                setCursor(
-                  new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1)
-                )
-              }
+              style={styles.btnMini}
+              onClick={() => setCursor(new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1))}
             >
               ▶
             </button>
@@ -620,8 +607,8 @@ function CalendarModal({ onClose, tx }) {
               textAlign: "center",
               fontSize: 12,
               color: "#6b7280",
-              fontWeight: 700,
-              marginBottom: "8px",
+              fontWeight: 800,
+              marginBottom: 8,
             }}
           >
             {["일", "월", "화", "수", "목", "금", "토"].map((d) => (
@@ -631,7 +618,7 @@ function CalendarModal({ onClose, tx }) {
             ))}
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(7,1fr)", gap: "6px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(7,1fr)", gap: 6 }}>
             {grid.map((cell, idx) => {
               if (!cell) return <div key={idx} style={{ height: 44 }} />;
               const iso = formatDate(cell);
@@ -650,18 +637,11 @@ function CalendarModal({ onClose, tx }) {
                     borderRadius: 12,
                     position: "relative",
                     background: isSelected ? "#f0f9ff" : "white",
-                    fontWeight: 600,
+                    fontWeight: 700,
                     color: isSelected ? "#0369a1" : "#111827",
                   }}
                 >
-                  <div
-                    style={{
-                      display: "grid",
-                      placeItems: "center",
-                      height: "100%",
-                      position: "relative",
-                    }}
-                  >
+                  <div style={{ display: "grid", placeItems: "center", height: "100%", position: "relative" }}>
                     <span style={{ position: "relative", color: isToday ? "white" : undefined }}>
                       {cell.getDate()}
                       {isToday && (
@@ -698,15 +678,15 @@ function CalendarModal({ onClose, tx }) {
 
           <div
             style={{
-              marginTop: "16px",
+              marginTop: 16,
               borderTop: "2px solid #bae6fd",
-              paddingTop: "12px",
+              paddingTop: 12,
               background: "#f0f9ff",
               borderRadius: 12,
-              padding: "12px",
+              padding: 12,
             }}
           >
-            <div className="font-bold" style={{ color: "#0369a1", marginBottom: "8px" }}>
+            <div style={{ fontWeight: 800, color: "#0369a1", marginBottom: 8 }}>
               {selected.replaceAll("-", ".")} 사용 내역
             </div>
             <DateBreakdown selected={selected} tx={tx} />
@@ -717,7 +697,7 @@ function CalendarModal({ onClose, tx }) {
   );
 }
 
-/* -------------------- DateBreakdown -------------------- */
+/* 달력 하단 당일 합계 */
 function DateBreakdown({ selected, tx }) {
   const filtered = tx.filter((t) => String(t.date) === selected);
   const totalBy = filtered.reduce(
@@ -731,18 +711,25 @@ function DateBreakdown({ selected, tx }) {
   );
 
   return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <span className="text-sky-600 font-semibold">지영</span>
-        <span className="font-bold">₩{totalBy.byUser.지영.toLocaleString("ko-KR")}</span>
+    <div style={{ display: "grid", gap: 6 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <span style={{ color: "#0284c7", fontWeight: 700 }}>지영</span>
+        <span style={{ fontWeight: 800 }}>₩{totalBy.byUser.지영.toLocaleString("ko-KR")}</span>
       </div>
-      <div className="flex items-center justify-between">
-        <span className="text-sky-600 font-semibold">지원</span>
-        <span className="font-bold">₩{totalBy.byUser.지원.toLocaleString("ko-KR")}</span>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <span style={{ color: "#0284c7", fontWeight: 700 }}>지원</span>
+        <span style={{ fontWeight: 800 }}>₩{totalBy.byUser.지원.toLocaleString("ko-KR")}</span>
       </div>
       <div
-        className="flex items-center justify-between"
-        style={{ fontWeight: 800, fontSize: "1rem", paddingTop: "8px", borderTop: "2px solid #bae6fd" }}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          fontWeight: 900,
+          fontSize: 16,
+          paddingTop: 8,
+          borderTop: "2px solid #bae6fd",
+        }}
       >
         <span>합계</span>
         <span style={{ color: "#0284c7" }}>₩{totalBy.total.toLocaleString("ko-KR")}</span>
@@ -751,7 +738,7 @@ function DateBreakdown({ selected, tx }) {
   );
 }
 
-/* ------------------------------ 목록 모달 (수정/삭제만 소형) ------------------------------ */
+/* -------- 목록 모달 (수정/삭제 포함) -------- */
 function ListModal({ onClose, tx, onDelete, onEdit }) {
   const today = new Date();
   const [who, setWho] = useState("all");
@@ -779,53 +766,21 @@ function ListModal({ onClose, tx, onDelete, onEdit }) {
 
   const total = rows.reduce((s, r) => s + (Number(r.amount) || 0), 0);
 
-  // 공통 소형 버튼 스타일 (수정/삭제 전용)
-  const smallBtnBase = {
-    padding: "3px 8px 1px 8px", // 총 높이 4px, 텍스트 2px 위로(Top 3 / Bottom 1)
-    borderWidth: "1px",
-    borderStyle: "solid",
-    borderRadius: "8px",
-    fontSize: "11px",
-    fontWeight: 600,
-    lineHeight: 1,
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: "4px",
-    whiteSpace: "nowrap",
-  };
-
-  const editBtnStyle = {
-    ...smallBtnBase,
-    background: "#eef2ff",
-    color: "#3730a3",
-    borderColor: "#c7d2fe",
-  };
-
-  const delBtnStyle = {
-    ...smallBtnBase,
-    background: "#fee2e2",
-    color: "#b91c1c",
-    borderColor: "#fecaca",
-  };
-
   return (
-    <div className="modal-overlay">
-      <div className="modal">
-        <div className="modal-head">
+    <div style={styles.modalOverlay}>
+      <div style={styles.modal}>
+        <div style={styles.modalHead}>
           <div>📋 내 기록 목록</div>
-          <button className="iconbtn" onClick={onClose}>
+          <button onClick={onClose} style={styles.iconBtn}>
             <Icon name="x" />
           </button>
         </div>
 
-        <div className="modal-body">
-          {/* 필터 */}
-          <div style={{ marginBottom: "12px" }}>
-            <div className="text-xs font-semibold text-gray-600" style={{ marginBottom: "6px" }}>
-              이름
-            </div>
-            <div className="flex items-center gap-2">
+        <div style={styles.modalBody}>
+          {/* 필터 - 이름 */}
+          <div style={{ marginBottom: 12 }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: "#6b7280", marginBottom: 6 }}>이름</div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               {[
                 { label: "전체", value: "all" },
                 { label: "지영", value: "지영" },
@@ -836,25 +791,30 @@ function ListModal({ onClose, tx, onDelete, onEdit }) {
                   style={{
                     display: "inline-flex",
                     alignItems: "center",
-                    gap: "6px",
+                    gap: 6,
                     padding: "6px 10px",
                     background: "#f0f9ff",
                     borderRadius: 12,
                     cursor: "pointer",
+                    border: who === opt.value ? "2px solid #7dd3fc" : "2px solid transparent",
                   }}
                 >
-                  <input type="radio" checked={who === opt.value} onChange={() => setWho(opt.value)} />
+                  <input
+                    type="radio"
+                    checked={who === opt.value}
+                    onChange={() => setWho(opt.value)}
+                    style={{ accentColor: "#38bdf8" }}
+                  />
                   {opt.label}
                 </label>
               ))}
             </div>
           </div>
 
-          <div style={{ marginBottom: "12px" }}>
-            <div className="text-xs font-semibold text-gray-600" style={{ marginBottom: "6px" }}>
-              기간
-            </div>
-            <div className="flex items-center gap-2" style={{ flexWrap: "wrap" }}>
+          {/* 필터 - 기간 */}
+          <div style={{ marginBottom: 12 }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: "#6b7280", marginBottom: 6 }}>기간</div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
               {[
                 { label: "이번 주", value: "week" },
                 { label: "이번 달", value: "month" },
@@ -865,81 +825,131 @@ function ListModal({ onClose, tx, onDelete, onEdit }) {
                   style={{
                     display: "inline-flex",
                     alignItems: "center",
-                    gap: "6px",
+                    gap: 6,
                     padding: "6px 10px",
                     background: "#f0f9ff",
                     borderRadius: 12,
                     cursor: "pointer",
+                    border: period === opt.value ? "2px solid #7dd3fc" : "2px solid transparent",
                   }}
                 >
-                  <input type="radio" checked={period === opt.value} onChange={() => applyPreset(opt.value)} />
+                  <input
+                    type="radio"
+                    checked={period === opt.value}
+                    onChange={() => applyPreset(opt.value)}
+                    style={{ accentColor: "#38bdf8" }}
+                  />
                   {opt.label}
                 </label>
               ))}
             </div>
 
             {period === "custom" && (
-              <div style={{ marginTop: "8px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
-                <input type="date" value={start} onChange={(e) => setStart(e.target.value)} className="date" />
-                <input type="date" value={end} onChange={(e) => setEnd(e.target.value)} className="date" />
+              <div style={{ marginTop: 8, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                <input
+                  type="date"
+                  value={start}
+                  onChange={(e) => setStart(e.target.value)}
+                  style={styles.date}
+                />
+                <input type="date" value={end} onChange={(e) => setEnd(e.target.value)} style={styles.date} />
               </div>
             )}
           </div>
 
           {/* 리스트 */}
-          <div style={{ border: "2px solid #bae6fd", borderRadius: "1rem", maxHeight: "320px", overflow: "auto" }}>
+          <div style={{ border: "2px solid #bae6fd", borderRadius: 16, maxHeight: 340, overflow: "auto" }}>
             {rows.length === 0 && (
-              <div style={{ padding: "16px", textAlign: "center", color: "#9ca3af" }}>해당 기간 내 기록 없음</div>
+              <div style={{ padding: 16, textAlign: "center", color: "#9ca3af" }}>해당 기간 내 기록 없음</div>
             )}
-            {rows.map((r) => (
-              <div key={r.id || `${r.date}-${r.item}-${r.amount}`} className="row">
-                <div className="row-date">{String(r.date).replaceAll("-", ".")}</div>
 
+            {rows.map((r) => (
+              <div
+                key={r.id || `${r.date}-${r.item}-${r.amount}`}
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "84px 1fr 110px", // 날짜 | 내용 | 액션(수정/삭제)
+                  alignItems: "center",
+                  gap: 8,
+                  padding: "10px 12px",
+                  borderBottom: "1px solid #e5e7eb",
+                }}
+              >
+                {/* 날짜 */}
+                <div style={{ fontSize: 12, color: "#6b7280", fontWeight: 600 }}>
+                  {String(r.date).replaceAll("-", ".")}
+                </div>
+
+                {/* 내용 + 금액(오른쪽 정렬) */}
                 <div
                   style={{
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "space-between",
-                    gap: "8px",
+                    gap: 8,
                     minWidth: 0,
                   }}
                 >
-                  <div className="text-xs" style={{ color: "#111827", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                    <span className="text-sky-600" style={{ fontWeight: 700, marginRight: 4 }}>
-                      {r.user}
-                    </span>
+                  <div
+                    style={{
+                      fontSize: 12,
+                      color: "#111827",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                    title={`${r.user} ${r.place} — ${r.item}`}
+                  >
+                    <span style={{ color: "#0284c7", fontWeight: 800, marginRight: 4 }}>{r.user}</span>
                     {r.place} — {r.item}
                   </div>
-
-                  <div className="row-actions" style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                    <button style={editBtnStyle} onClick={() => onEdit(r)}>
-                      <span style={{ display: "inline-block" }}>수정</span>
-                    </button>
-                    <button style={delBtnStyle} onClick={() => onDelete(r.id)}>
-                      <span style={{ display: "inline-block" }}>삭제</span>
-                    </button>
-                  </div>
-
-                  <div className="row-amount" style={{ fontWeight: 700, color: "#0369a1", marginLeft: "auto" }}>
+                  <div style={{ fontWeight: 800, color: "#075985", whiteSpace: "nowrap" }}>
                     ₩{Number(r.amount).toLocaleString("ko-KR")}
                   </div>
+                </div>
+
+                {/* 액션 버튼 */}
+                <div style={{ display: "flex", justifyContent: "flex-end", gap: 6 }}>
+                  <button
+                    onClick={() => onEdit(r)}
+                    style={{
+                      ...styles.btnMini,
+                      background: "#eff6ff",
+                      color: "#2563eb",
+                      borderColor: "#bfdbfe",
+                    }}
+                  >
+                    수정
+                  </button>
+                  <button
+                    onClick={() => onDelete(r.id)}
+                    style={{
+                      ...styles.btnMini,
+                      background: "#fef2f2",
+                      color: "#dc2626",
+                      borderColor: "#fecaca",
+                    }}
+                  >
+                    삭제
+                  </button>
                 </div>
               </div>
             ))}
           </div>
 
+          {/* 합계 */}
           <div
             style={{
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
-              fontWeight: 800,
-              fontSize: "1rem",
+              fontWeight: 900,
+              fontSize: 16,
               background: "linear-gradient(90deg,#f0f9ff,#eff6ff)",
               padding: "12px 16px",
-              borderRadius: "1rem",
+              borderRadius: 16,
               border: "2px solid #bae6fd",
-              marginTop: "12px",
+              marginTop: 12,
             }}
           >
             <span>합계</span>
@@ -951,7 +961,7 @@ function ListModal({ onClose, tx, onDelete, onEdit }) {
   );
 }
 
-/* ------------------------------ 월말 요약 모달 ------------------------------ */
+/* -------- 월말 요약 -------- */
 function EomSummaryModal({ onClose, tx }) {
   const today = new Date();
   const monthKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}`;
@@ -972,75 +982,82 @@ function EomSummaryModal({ onClose, tx }) {
     .slice(0, 3);
 
   return (
-    <div className="modal-overlay">
-      <div className="modal" style={{ maxWidth: 420 }}>
-        <div className="modal-head" style={{ borderColor: "#e9d5ff", background: "linear-gradient(90deg,#faf5ff,#fdf2f8)" }}>
-          <div className="font-bold" style={{ color: "#7e22ce" }}>
-            📊 월말 요약
-          </div>
-          <button className="iconbtn" onClick={onClose}>
+    <div style={styles.modalOverlay}>
+      <div style={{ ...styles.modal, borderColor: "#e9d5ff" }}>
+        <div style={{ ...styles.modalHead, background: "linear-gradient(90deg,#faf5ff,#fdf2f8)" }}>
+          <div style={{ color: "#7e22ce", fontWeight: 800 }}>📊 월말 요약</div>
+          <button onClick={onClose} style={styles.iconBtn}>
             <Icon name="x" />
           </button>
         </div>
 
-        <div className="p-5 text-sm space-y-4">
+        <div style={styles.modalBody}>
           <div
-            className="flex items-center justify-between font-bold text-lg"
             style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              fontWeight: 900,
+              fontSize: 18,
               background: "linear-gradient(90deg,#f0f9ff,#eff6ff)",
-              padding: "16px",
-              borderRadius: "1rem",
+              padding: "14px 16px",
+              borderRadius: 16,
               border: "2px solid #bae6fd",
+              marginBottom: 12,
             }}
           >
             <span>💸 이번 달 총 사용</span>
-            <span style={{ color: "#0369a1" }}>₩{totals.total.toLocaleString("ko-KR")}</span>
+            <span style={{ color: "#0284c7" }}>₩{totals.total.toLocaleString("ko-KR")}</span>
           </div>
 
-          <div className="grid grid-cols-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-            <div style={{ border: "2px solid #bae6fd", borderRadius: "1rem", padding: "16px", background: "#f0f9ff" }}>
-              <div className="font-bold" style={{ color: "#0369a1", marginBottom: "12px" }}>
-                👥 사용자별
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            <div style={{ border: "2px solid #bae6fd", borderRadius: 16, padding: 12, background: "#f0f9ff" }}>
+              <div style={{ fontWeight: 800, marginBottom: 8, color: "#0369a1" }}>👥 사용자별</div>
+              <div style={styles.kvRow}>
+                <span>지영</span>
+                <span style={{ fontWeight: 800 }}>
+                  ₩{(totals.byUser.지영 || 0).toLocaleString("ko-KR")}
+                </span>
               </div>
-              <div className="flex items-center justify-between" style={{ marginBottom: "8px" }}>
-                <span className="text-gray-600">지영</span>
-                <span className="font-semibold">₩{totals.byUser.지영.toLocaleString("ko-KR")}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-gray-600">지원</span>
-                <span className="font-semibold">₩{totals.byUser.지원.toLocaleString("ko-KR")}</span>
+              <div style={styles.kvRow}>
+                <span>지원</span>
+                <span style={{ fontWeight: 800 }}>
+                  ₩{(totals.byUser.지원 || 0).toLocaleString("ko-KR")}
+                </span>
               </div>
             </div>
 
-            <div style={{ border: "2px solid #fed7aa", borderRadius: "1rem", padding: "16px", background: "#ffedd5" }}>
-              <div className="font-bold" style={{ color: "#9a3412", marginBottom: "12px" }}>
-                📑 카테고리별
+            <div style={{ border: "2px solid #fdba74", borderRadius: 16, padding: 12, background: "#fff7ed" }}>
+              <div style={{ fontWeight: 800, marginBottom: 8, color: "#9a3412" }}>📑 카테고리별</div>
+              <div style={styles.kvRow}>
+                <span>생활</span>
+                <span style={{ fontWeight: 800 }}>
+                  ₩{(totals.byCategory.생활 || 0).toLocaleString("ko-KR")}
+                </span>
               </div>
-              <div className="flex items-center justify-between" style={{ marginBottom: "8px" }}>
-                <span className="text-gray-600">생활</span>
-                <span className="font-semibold">₩{(totals.byCategory.생활 || 0).toLocaleString("ko-KR")}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-gray-600">외식</span>
-                <span className="font-semibold">₩{(totals.byCategory.외식 || 0).toLocaleString("ko-KR")}</span>
+              <div style={styles.kvRow}>
+                <span>외식</span>
+                <span style={{ fontWeight: 800 }}>
+                  ₩{(totals.byCategory.외식 || 0).toLocaleString("ko-KR")}
+                </span>
               </div>
             </div>
           </div>
 
-          <div style={{ border: "2px solid #e9d5ff", borderRadius: "1rem", padding: "16px", background: "#f3e8ff" }}>
-            <div className="font-bold" style={{ color: "#7e22ce", marginBottom: "12px" }}>
-              🏆 어디서 많이 썼나요? (Top 3)
-            </div>
-            {topPlaces.length === 0 && <div className="text-gray-400" style={{ textAlign: "center", padding: "8px 0" }}>데이터 없음</div>}
+          <div style={{ border: "2px solid #e9d5ff", borderRadius: 16, padding: 12, background: "#faf5ff", marginTop: 12 }}>
+            <div style={{ fontWeight: 800, marginBottom: 8, color: "#7e22ce" }}>🏆 어디서 많이 썼나요? (Top 3)</div>
+            {topPlaces.length === 0 && (
+              <div style={{ textAlign: "center", color: "#9ca3af", padding: 8 }}>데이터 없음</div>
+            )}
             {topPlaces.map(([place, amt], idx) => (
-              <div key={place} className="flex items-center justify-between" style={{ marginBottom: "8px" }}>
-                <span className="text-gray-600">
-                  <span className="inline-block" style={{ width: 24, fontWeight: 700, color: "#7e22ce" }}>
+              <div key={place} style={styles.kvRow}>
+                <span>
+                  <span style={{ display: "inline-block", width: 18, fontWeight: 900, color: "#6d28d9" }}>
                     {idx + 1}.
                   </span>
                   {place}
                 </span>
-                <span className="font-semibold">₩{amt.toLocaleString("ko-KR")}</span>
+                <span style={{ fontWeight: 800 }}>₩{amt.toLocaleString("ko-KR")}</span>
               </div>
             ))}
           </div>
@@ -1050,7 +1067,7 @@ function EomSummaryModal({ onClose, tx }) {
   );
 }
 
-/* ------------------------------ 작성 모달 ------------------------------ */
+/* -------- 내역 추가 -------- */
 function AddTxModal({ onClose, onSubmit }) {
   const todayIso = formatDate(new Date());
   const [form, setForm] = useState({
@@ -1081,134 +1098,86 @@ function AddTxModal({ onClose, onSubmit }) {
   };
 
   return (
-    <div className="modal-overlay">
-      <div className="modal" style={{ maxWidth: 420 }}>
-        <div className="modal-head">
+    <div style={styles.modalOverlay}>
+      <div style={styles.modal}>
+        <div style={styles.modalHead}>
           <div>✏️ 내역 작성</div>
-          <button className="iconbtn" onClick={onClose}>
+          <button onClick={onClose} style={styles.iconBtn}>
             <Icon name="x" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-5 space-y-4 text-sm">
-          <div className="grid grid-cols-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+        <form onSubmit={handleSubmit} style={styles.modalBody}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
             <div>
-              <div className="text-xs font-semibold text-gray-600" style={{ marginBottom: "6px" }}>
-                날짜
-              </div>
+              <div style={styles.label}>날짜</div>
               <input
                 type="date"
                 value={form.date}
                 onChange={(e) => handleChange("date", e.target.value)}
-                className="input"
+                style={styles.input}
               />
             </div>
             <div>
-              <div className="text-xs font-semibold text-gray-600" style={{ marginBottom: "6px" }}>
-                사용자
-              </div>
-              <div className="flex items-center gap-2">
-                <label
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "6px",
-                    padding: "6px 10px",
-                    background: "#f0f9ff",
-                    borderRadius: 12,
-                    cursor: "pointer",
-                    fontSize: 12,
-                  }}
-                >
-                  <input type="radio" checked={form.user === "지영"} onChange={() => handleChange("user", "지영")} />
-                  지영
-                </label>
-                <label
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "6px",
-                    padding: "6px 10px",
-                    background: "#f0f9ff",
-                    borderRadius: 12,
-                    cursor: "pointer",
-                    fontSize: 12,
-                  }}
-                >
-                  <input type="radio" checked={form.user === "지원"} onChange={() => handleChange("user", "지원")} />
-                  지원
-                </label>
+              <div style={styles.label}>사용자</div>
+              <div style={{ display: "flex", gap: 8 }}>
+                {["지영", "지원"].map((u) => (
+                  <label key={u} style={styles.choice}>
+                    <input
+                      type="radio"
+                      checked={form.user === u}
+                      onChange={() => handleChange("user", u)}
+                      style={{ accentColor: "#38bdf8" }}
+                    />
+                    {u}
+                  </label>
+                ))}
               </div>
             </div>
           </div>
 
           <div>
-            <div className="text-xs font-semibold text-gray-600" style={{ marginBottom: "6px" }}>
-              카테고리
-            </div>
-            <div className="flex items-center gap-2">
-              <label
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  padding: "8px 12px",
-                  background: "#f0f9ff",
-                  borderRadius: 12,
-                  cursor: "pointer",
-                }}
-              >
-                <input type="radio" checked={form.category === "생활"} onChange={() => handleChange("category", "생활")} />
-                생활
-              </label>
-              <label
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  padding: "8px 12px",
-                  background: "#ffedd5",
-                  borderRadius: 12,
-                  cursor: "pointer",
-                }}
-              >
-                <input type="radio" checked={form.category === "외식"} onChange={() => handleChange("category", "외식")} />
-                외식
-              </label>
+            <div style={styles.label}>카테고리</div>
+            <div style={{ display: "flex", gap: 8 }}>
+              {["생활", "외식"].map((c) => (
+                <label key={c} style={styles.choice}>
+                  <input
+                    type="radio"
+                    checked={form.category === c}
+                    onChange={() => handleChange("category", c)}
+                    style={{ accentColor: "#38bdf8" }}
+                  />
+                  {c}
+                </label>
+              ))}
             </div>
           </div>
 
-          <div className="grid grid-cols-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
             <div>
-              <div className="text-xs font-semibold text-gray-600" style={{ marginBottom: "6px" }}>
-                사용처
-              </div>
+              <div style={styles.label}>사용처</div>
               <input
                 type="text"
                 value={form.place}
                 onChange={(e) => handleChange("place", e.target.value)}
                 placeholder="이마트"
-                className="input"
+                style={styles.input}
               />
             </div>
             <div>
-              <div className="text-xs font-semibold text-gray-600" style={{ marginBottom: "6px" }}>
-                구매 물건
-              </div>
+              <div style={styles.label}>구매 물건</div>
               <input
                 type="text"
                 value={form.item}
                 onChange={(e) => handleChange("item", e.target.value)}
                 placeholder="계란"
-                className="input"
+                style={styles.input}
               />
             </div>
           </div>
 
           <div>
-            <div className="text-xs font-semibold text-gray-600" style={{ marginBottom: "6px" }}>
-              금액(원)
-            </div>
+            <div style={styles.label}>금액(원)</div>
             <input
               type="number"
               min={0}
@@ -1216,24 +1185,23 @@ function AddTxModal({ onClose, onSubmit }) {
               value={form.amount}
               onChange={(e) => handleChange("amount", e.target.value)}
               placeholder="10000"
-              className="input"
-              style={{ fontSize: "1rem", fontWeight: 700 }}
+              style={{ ...styles.input, fontSize: 16, fontWeight: 800 }}
             />
           </div>
 
           <button
             type="submit"
             disabled={!canSubmit}
-            className="button"
             style={{
               width: "100%",
-              background: canSubmit ? "linear-gradient(90deg,#38bdf8,#3b82f6)" : "#e5e7eb",
+              padding: "12px 14px",
+              borderRadius: 14,
               color: "#fff",
-              fontWeight: 700,
-              padding: "12px",
-              borderRadius: "16px",
-              boxShadow: canSubmit ? "0 6px 12px rgba(0,0,0,.08)" : "none",
+              fontWeight: 900,
+              background: canSubmit ? "linear-gradient(90deg,#38bdf8,#3b82f6)" : "#9ca3af",
               cursor: canSubmit ? "pointer" : "not-allowed",
+              border: "none",
+              boxShadow: canSubmit ? "0 6px 16px rgba(59,130,246,.25)" : "none",
             }}
           >
             💾 저장하기
@@ -1244,7 +1212,7 @@ function AddTxModal({ onClose, onSubmit }) {
   );
 }
 
-/* ------------------------------ 수정 모달 ------------------------------ */
+/* -------- 내역 수정 -------- */
 function EditTxModal({ onClose, onSubmit, initialData }) {
   const [form, setForm] = useState({
     date: initialData?.date || "",
@@ -1281,136 +1249,86 @@ function EditTxModal({ onClose, onSubmit, initialData }) {
   };
 
   return (
-    <div className="modal-overlay">
-      <div className="modal" style={{ maxWidth: 420 }}>
-        <div className="modal-head" style={{ borderColor: "#dbeafe", background: "linear-gradient(90deg,#eff6ff,#eef2ff)" }}>
-          <div className="font-bold" style={{ color: "#1d4ed8" }}>
-            ✏️ 내역 수정
-          </div>
-          <button className="iconbtn" onClick={onClose}>
+    <div style={styles.modalOverlay}>
+      <div style={{ ...styles.modal, borderColor: "#bfdbfe" }}>
+        <div style={{ ...styles.modalHead, background: "linear-gradient(90deg,#eff6ff,#e0e7ff)" }}>
+          <div style={{ color: "#1d4ed8", fontWeight: 800 }}>✏️ 내역 수정</div>
+          <button onClick={onClose} style={styles.iconBtn}>
             <Icon name="x" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-5 space-y-4 text-sm">
-          <div className="grid grid-cols-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+        <form onSubmit={handleSubmit} style={styles.modalBody}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
             <div>
-              <div className="text-xs font-semibold text-gray-600" style={{ marginBottom: "6px" }}>
-                날짜
-              </div>
+              <div style={styles.label}>날짜</div>
               <input
                 type="date"
                 value={form.date}
                 onChange={(e) => handleChange("date", e.target.value)}
-                className="input"
+                style={styles.inputBlue}
               />
             </div>
             <div>
-              <div className="text-xs font-semibold text-gray-600" style={{ marginBottom: "6px" }}>
-                사용자
-              </div>
-              <div className="flex items-center gap-2">
-                <label
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "6px",
-                    padding: "6px 10px",
-                    background: "#eff6ff",
-                    borderRadius: 12,
-                    cursor: "pointer",
-                    fontSize: 12,
-                  }}
-                >
-                  <input type="radio" checked={form.user === "지영"} onChange={() => handleChange("user", "지영")} />
-                  지영
-                </label>
-                <label
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "6px",
-                    padding: "6px 10px",
-                    background: "#eff6ff",
-                    borderRadius: 12,
-                    cursor: "pointer",
-                    fontSize: 12,
-                  }}
-                >
-                  <input type="radio" checked={form.user === "지원"} onChange={() => handleChange("user", "지원")} />
-                  지원
-                </label>
+              <div style={styles.label}>사용자</div>
+              <div style={{ display: "flex", gap: 8 }}>
+                {["지영", "지원"].map((u) => (
+                  <label key={u} style={styles.choiceBlue}>
+                    <input
+                      type="radio"
+                      checked={form.user === u}
+                      onChange={() => handleChange("user", u)}
+                      style={{ accentColor: "#3b82f6" }}
+                    />
+                    {u}
+                  </label>
+                ))}
               </div>
             </div>
           </div>
 
           <div>
-            <div className="text-xs font-semibold text-gray-600" style={{ marginBottom: "6px" }}>
-              카테고리
-            </div>
-            <div className="flex items-center gap-2">
-              <label
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  padding: "8px 12px",
-                  background: "#f0f9ff",
-                  borderRadius: 12,
-                  cursor: "pointer",
-                }}
-              >
-                <input type="radio" checked={form.category === "생활"} onChange={() => handleChange("category", "생활")} />
-                생활
-              </label>
-              <label
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  padding: "8px 12px",
-                  background: "#ffedd5",
-                  borderRadius: 12,
-                  cursor: "pointer",
-                }}
-              >
-                <input type="radio" checked={form.category === "외식"} onChange={() => handleChange("category", "외식")} />
-                외식
-              </label>
+            <div style={styles.label}>카테고리</div>
+            <div style={{ display: "flex", gap: 8 }}>
+              {["생활", "외식"].map((c) => (
+                <label key={c} style={c === "생활" ? styles.choiceSky : styles.choiceOrange}>
+                  <input
+                    type="radio"
+                    checked={form.category === c}
+                    onChange={() => handleChange("category", c)}
+                    style={{ accentColor: c === "생활" ? "#38bdf8" : "#fb923c" }}
+                  />
+                  {c}
+                </label>
+              ))}
             </div>
           </div>
 
-          <div className="grid grid-cols-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
             <div>
-              <div className="text-xs font-semibold text-gray-600" style={{ marginBottom: "6px" }}>
-                사용처
-              </div>
+              <div style={styles.label}>사용처</div>
               <input
                 type="text"
                 value={form.place}
                 onChange={(e) => handleChange("place", e.target.value)}
                 placeholder="이마트"
-                className="input"
+                style={styles.inputBlue}
               />
             </div>
             <div>
-              <div className="text-xs font-semibold text-gray-600" style={{ marginBottom: "6px" }}>
-                구매 물건
-              </div>
+              <div style={styles.label}>구매 물건</div>
               <input
                 type="text"
                 value={form.item}
                 onChange={(e) => handleChange("item", e.target.value)}
                 placeholder="계란"
-                className="input"
+                style={styles.inputBlue}
               />
             </div>
           </div>
 
           <div>
-            <div className="text-xs font-semibold text-gray-600" style={{ marginBottom: "6px" }}>
-              금액(원)
-            </div>
+            <div style={styles.label}>금액(원)</div>
             <input
               type="number"
               min={0}
@@ -1418,24 +1336,23 @@ function EditTxModal({ onClose, onSubmit, initialData }) {
               value={form.amount}
               onChange={(e) => handleChange("amount", e.target.value)}
               placeholder="10000"
-              className="input"
-              style={{ fontSize: "1rem", fontWeight: 700 }}
+              style={{ ...styles.inputBlue, fontSize: 16, fontWeight: 800 }}
             />
           </div>
 
           <button
             type="submit"
             disabled={!canSubmit}
-            className="button"
             style={{
               width: "100%",
-              background: canSubmit ? "linear-gradient(90deg,#60a5fa,#4f46e5)" : "#e5e7eb",
+              padding: "12px 14px",
+              borderRadius: 14,
               color: "#fff",
-              fontWeight: 700,
-              padding: "12px",
-              borderRadius: "16px",
-              boxShadow: canSubmit ? "0 6px 12px rgba(0,0,0,.08)" : "none",
+              fontWeight: 900,
+              background: canSubmit ? "linear-gradient(90deg,#60a5fa,#4f46e5)" : "#9ca3af",
               cursor: canSubmit ? "pointer" : "not-allowed",
+              border: "none",
+              boxShadow: canSubmit ? "0 6px 16px rgba(79,70,229,.25)" : "none",
             }}
           >
             💾 수정하기
@@ -1446,7 +1363,7 @@ function EditTxModal({ onClose, onSubmit, initialData }) {
   );
 }
 
-/* ------------------------------ utils ------------------------------ */
+/* =============== utils =============== */
 function sameDate(a, b) {
   return (
     a.getFullYear() === b.getFullYear() &&
@@ -1496,3 +1413,202 @@ function getWeekEnd(d) {
   e.setDate(s.getDate() + 6);
   return e;
 }
+
+/* =============== 스타일 모음 =============== */
+const styles = {
+  iconBtn: {
+    width: 36,
+    height: 36,
+    display: "grid",
+    placeItems: "center",
+    borderRadius: 12,
+    background: "#f3f4f6",
+    color: "#374151",
+    border: "none",
+    cursor: "pointer",
+  },
+  iconBtnGhost: {
+    width: 36,
+    height: 36,
+    display: "grid",
+    placeItems: "center",
+    borderRadius: 12,
+    background: "#eaf4ff",
+    color: "#0ea5e9",
+    border: "none",
+    cursor: "pointer",
+  },
+  iconBtnPrimary: {
+    width: 36,
+    height: 36,
+    display: "grid",
+    placeItems: "center",
+    borderRadius: 12,
+    background: "linear-gradient(135deg,#38bdf8,#3b82f6)",
+    color: "#fff",
+    border: "none",
+    cursor: "pointer",
+    boxShadow: "0 4px 10px rgba(59,130,246,.25)",
+  },
+  iconBtnDanger: {
+    width: 36,
+    height: 36,
+    display: "grid",
+    placeItems: "center",
+    borderRadius: 12,
+    background: "#fee2e2",
+    color: "#ef4444",
+    border: "none",
+    cursor: "pointer",
+  },
+  actionCard: {
+    display: "flex",
+    alignItems: "center",
+    gap: 12,
+    padding: "12px 16px",
+    background: "linear-gradient(90deg,#faf5ff,#fdf2f8)",
+    borderRadius: 16,
+    border: "2px solid #e9d5ff",
+    cursor: "pointer",
+  },
+  actionIcon: {
+    width: 36,
+    height: 36,
+    background: "#fff",
+    color: "#8b5cf6",
+    borderRadius: 12,
+    display: "grid",
+    placeItems: "center",
+  },
+  card: {
+    background: "#fff",
+    border: "2px solid #bae6fd",
+    borderRadius: 16,
+    padding: 16,
+    boxShadow: "0 8px 24px rgba(0,0,0,.04)",
+  },
+  bulletIcon: (bg) => ({
+    width: 24,
+    height: 24,
+    background: bg,
+    borderRadius: 8,
+    display: "grid",
+    placeItems: "center",
+  }),
+  modalOverlay: {
+    position: "fixed",
+    inset: 0,
+    background: "rgba(0,0,0,.45)",
+    backdropFilter: "blur(2px)",
+    display: "grid",
+    placeItems: "center",
+    padding: 16,
+    zIndex: 50,
+  },
+  modal: {
+    width: "100%",
+    maxWidth: 420,
+    background: "#fff",
+    borderRadius: 24,
+    boxShadow: "0 16px 48px rgba(0,0,0,.12)",
+    border: "2px solid #bae6fd",
+    overflow: "hidden",
+  },
+  modalHead: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: "12px 16px",
+    borderBottom: "1px solid #e5e7eb",
+    background: "linear-gradient(90deg,#f0f9ff,#eff6ff)",
+    fontWeight: 800,
+    color: "#0ea5e9",
+  },
+  modalBody: {
+    padding: 16,
+    fontSize: 14,
+    display: "grid",
+    gap: 12,
+  },
+  btnMini: {
+    padding: "6px 10px",
+    borderRadius: 10,
+    border: "2px solid #e5e7eb",
+    background: "#f9fafb",
+    fontWeight: 700,
+    cursor: "pointer",
+  },
+  input: {
+    width: "100%",
+    padding: "10px 12px",
+    border: "2px solid #bae6fd",
+    borderRadius: 12,
+    outline: "none",
+  },
+  inputBlue: {
+    width: "100%",
+    padding: "10px 12px",
+    border: "2px solid #bfdbfe",
+    borderRadius: 12,
+    outline: "none",
+  },
+  date: {
+    width: "100%",
+    padding: "10px 12px",
+    border: "2px solid #bae6fd",
+    borderRadius: 12,
+    outline: "none",
+  },
+  label: {
+    fontSize: 12,
+    fontWeight: 700,
+    color: "#6b7280",
+    marginBottom: 6,
+  },
+  choice: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 6,
+    padding: "6px 10px",
+    background: "#f0f9ff",
+    borderRadius: 12,
+    cursor: "pointer",
+  },
+  choiceBlue: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 6,
+    padding: "6px 10px",
+    background: "#eff6ff",
+    borderRadius: 12,
+    cursor: "pointer",
+    border: "2px solid #bfdbfe",
+  },
+  choiceSky: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 6,
+    padding: "6px 10px",
+    background: "#f0f9ff",
+    borderRadius: 12,
+    cursor: "pointer",
+    border: "2px solid #bae6fd",
+  },
+  choiceOrange: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 6,
+    padding: "6px 10px",
+    background: "#fff7ed",
+    borderRadius: 12,
+    cursor: "pointer",
+    border: "2px solid #fdba74",
+  },
+  kvRow: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 6,
+    fontSize: 14,
+  },
+};
