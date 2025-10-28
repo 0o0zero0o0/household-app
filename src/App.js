@@ -50,6 +50,7 @@ function Logo({ className = "h-6 w-auto" }) {
   );
 }
 
+/* ============================== App ============================== */
 export default function App() {
   // --- auth ---
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
@@ -419,6 +420,7 @@ function ActionCard({ icon, text, onClick }) {
 
 function CalendarModal({ onClose, tx }) {
   const today = new Date();
+  thead: null;
   const [cursor, setCursor] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
   const [selected, setSelected] = useState(formatDate(today));
   const { year, month, grid } = useMemo(() => buildMonthGrid(cursor), [cursor]);
@@ -535,12 +537,17 @@ function ListModal({ onClose, tx, onDelete, onEdit }) {
       <div className="w-full max-w-sm bg-white rounded-3xl shadow-2xl overflow-hidden border-2 border-sky-100">
         <div className="flex items-center justify-between px-5 py-4 border-b bg-gradient-to-r from-sky-50 to-blue-50">
           <div className="font-bold text-sky-700">📋 내 기록 목록</div>
-          <button aria-label="닫기" onClick={onClose} className="w-9 h-9 grid place-items-center rounded-xl hover:bg-white transition">
+          <button
+            aria-label="닫기"
+            onClick={onClose}
+            className="w-9 h-9 grid place-items-center rounded-xl hover:bg-white transition"
+          >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         <div className="p-5 space-y-4 text-sm">
+          {/* 이름 */}
           <div>
             <div className="text-xs font-semibold text-gray-600 mb-2">이름</div>
             <div className="flex items-center gap-3">
@@ -559,6 +566,7 @@ function ListModal({ onClose, tx, onDelete, onEdit }) {
             </div>
           </div>
 
+          {/* 기간 */}
           <div>
             <div className="text-xs font-semibold text-gray-600 mb-2">기간</div>
             <div className="flex items-center gap-2 flex-wrap">
@@ -593,42 +601,45 @@ function ListModal({ onClose, tx, onDelete, onEdit }) {
             )}
           </div>
 
+          {/* 목록 */}
           <div className="border-2 border-sky-100 rounded-2xl divide-y divide-sky-100 max-h-72 overflow-auto">
             {rows.length === 0 && <div className="p-4 text-center text-gray-400">해당 기간 내 기록 없음</div>}
-            {rows.map((r, i) => (
-              <div key={i} className="p-3 hover:bg-sky-50 transition">
-                <div className="flex items-center justify-between gap-2 mb-2">
-                  <div className="text-gray-500 text-xs font-medium">
-                    {String(r.date).replaceAll("-", ".")}
+            {rows.map((r) => (
+              <div
+                key={r.id || `${r.date}-${r.place}-${r.item}`}
+                className="p-4 hover:bg-sky-50 transition grid grid-cols-[88px_1fr_auto] items-start gap-3"
+              >
+                <div className="text-gray-500 text-xs font-medium">
+                  {String(r.date).replaceAll("-", ".")}
+                </div>
+                <div className="text-xs">
+                  <span className="text-sky-600 font-semibold mr-1">{r.user}</span>
+                  <span className="text-gray-700">{r.place} — {r.item}</span>
+                </div>
+                <div className="text-right">
+                  <div className="font-bold text-sky-700">
+                    ₩{Number(r.amount).toLocaleString("ko-KR")}
                   </div>
-                  <div className="flex items-center gap-1">
+                  <div className="mt-2 flex justify-end gap-1">
                     <button
                       onClick={() => onEdit(r)}
-                      className="px-2 py-1 text-xs bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition"
+                      className="px-2 py-1 text-[11px] leading-none bg-blue-500 text-white rounded-lg hover:bg-blue-600 active:translate-y-[1px] transition"
                     >
                       수정
                     </button>
                     <button
                       onClick={() => onDelete(r.id)}
-                      className="px-2 py-1 text-xs bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition"
+                      className="px-2 py-1 text-[11px] leading-none bg-red-500 text-white rounded-lg hover:bg-red-600 active:translate-y-[1px] transition"
                     >
                       삭제
                     </button>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="text-xs">
-                    <span className="text-sky-600 font-semibold mr-1">{r.user}</span>
-                    <span className="text-gray-700">{r.place} — {r.item}</span>
-                  </div>
-                  <div className="font-bold text-sky-700">
-                    ₩{Number(r.amount).toLocaleString("ko-KR")}
                   </div>
                 </div>
               </div>
             ))}
           </div>
 
+          {/* 합계 */}
           <div className="flex items-center justify-between font-bold text-base bg-gradient-to-r from-sky-50 to-blue-50 p-4 rounded-2xl border-2 border-sky-200">
             <span>합계</span>
             <span className="text-sky-600">₩{total.toLocaleString("ko-KR")}</span>
@@ -1049,7 +1060,7 @@ function summarizeByDate(tx) {
   return map;
 }
 function getWeekStart(d) {
-  const day = (d.getDay() + 6) % 7;
+  const day = (d.getDay() + 6) % 7; // 월요일 시작
   const s = new Date(d);
   s.setDate(d.getDate() - day);
   return s;
