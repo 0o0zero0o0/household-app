@@ -183,7 +183,7 @@ export default function App() {
 
   const handlePasswordSubmit = (e) => {
     e.preventDefault();
-    if (passwordInput === "!0121") {
+    if (passwordInput === "0121") {
       setIsAuthenticated(true);
       try {
         localStorage.setItem("auth", "1");
