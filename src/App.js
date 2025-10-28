@@ -8,6 +8,9 @@ import {
   orderBy,
   query,
   Timestamp,
+  deleteDoc,
+  doc,
+  updateDoc,
 } from "firebase/firestore";
 import {
   PieChart,
@@ -64,6 +67,8 @@ export default function App() {
   const [openList, setOpenList] = useState(false);
   const [openEom, setOpenEom] = useState(false);
   const [openAdd, setOpenAdd] = useState(false);
+  const [openEdit, setOpenEdit] = useState(false);
+  const [editTarget, setEditTarget] = useState(null);
 
   // --- data ---
   const [tx, setTx] = useState([]);
@@ -82,6 +87,30 @@ export default function App() {
       createdAt: Timestamp.now(),
     });
     await loadTx();
+  }
+
+  async function deleteTx(id) {
+    if (!window.confirm("정말 삭제하시겠습니까?")) return;
+    try {
+      await deleteDoc(doc(db, "tx", id));
+      await loadTx();
+    } catch (err) {
+      console.error("삭제 실패:", err);
+      alert("삭제에 실패했습니다.");
+    }
+  }
+
+  async function updateTx(id, record) {
+    try {
+      await updateDoc(doc(db, "tx", id), {
+        ...record,
+        amount: Number(record.amount) || 0,
+      });
+      await loadTx();
+    } catch (err) {
+      console.error("수정 실패:", err);
+      alert("수정에 실패했습니다.");
+    }
   }
 
   const handlePasswordSubmit = (e) => {
@@ -197,9 +226,8 @@ export default function App() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-sky-50 text-gray-900 flex items-start justify-center p-4 pt-4">
       <div className="w-full max-w-md flex flex-col items-center gap-4">
-        {/* 상단바: 프레임 제거 & 요소 축소 */}
+        {/* 상단바 */}
         <div className="w-full relative flex items-center justify-between px-1 pt-1">
-          {/* 왼쪽: 플러스 + 목록 */}
           <div className="flex items-center gap-1">
             <button
               aria-label="내역 작성"
@@ -217,12 +245,10 @@ export default function App() {
             </button>
           </div>
 
-          {/* 중앙: 로고 (절대 중앙) */}
           <div className="absolute left-1/2 -translate-x-1/2">
             <Logo className="h-6 w-auto" />
           </div>
 
-          {/* 오른쪽: 달력/로그아웃 */}
           <div className="flex items-center gap-1">
             <button
               aria-label="달력 열기"
@@ -290,9 +316,29 @@ export default function App() {
 
       {/* 모달들 */}
       {openCalendar && <CalendarModal onClose={() => setOpenCalendar(false)} tx={tx} />}
-      {openList && <ListModal onClose={() => setOpenList(false)} tx={tx} />}
+      {openList && (
+        <ListModal
+          onClose={() => setOpenList(false)}
+          tx={tx}
+          onDelete={deleteTx}
+          onEdit={(item) => {
+            setEditTarget(item);
+            setOpenEdit(true);
+          }}
+        />
+      )}
       {openEom && <EomSummaryModal onClose={() => setOpenEom(false)} tx={tx} />}
       {openAdd && <AddTxModal onClose={() => setOpenAdd(false)} onSubmit={addTx} />}
+      {openEdit && (
+        <EditTxModal
+          onClose={() => {
+            setOpenEdit(false);
+            setEditTarget(null);
+          }}
+          onSubmit={updateTx}
+          initialData={editTarget}
+        />
+      )}
     </div>
   );
 }
@@ -456,7 +502,7 @@ function CalendarModal({ onClose, tx }) {
   );
 }
 
-function ListModal({ onClose, tx }) {
+function ListModal({ onClose, tx, onDelete, onEdit }) {
   const today = new Date();
   const [who, setWho] = useState("all");
   const [period, setPeriod] = useState("week");
@@ -550,16 +596,34 @@ function ListModal({ onClose, tx }) {
           <div className="border-2 border-sky-100 rounded-2xl divide-y divide-sky-100 max-h-72 overflow-auto">
             {rows.length === 0 && <div className="p-4 text-center text-gray-400">해당 기간 내 기록 없음</div>}
             {rows.map((r, i) => (
-              <div key={i} className="p-4 grid grid-cols-[88px_1fr_auto] items-center gap-3 hover:bg-sky-50 transition">
-                <div className="text-gray-500 text-xs font-medium">
-                  {String(r.date).replaceAll("-", ".")}
+              <div key={i} className="p-3 hover:bg-sky-50 transition">
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <div className="text-gray-500 text-xs font-medium">
+                    {String(r.date).replaceAll("-", ".")}
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => onEdit(r)}
+                      className="px-2 py-1 text-xs bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition"
+                    >
+                      수정
+                    </button>
+                    <button
+                      onClick={() => onDelete(r.id)}
+                      className="px-2 py-1 text-xs bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition"
+                    >
+                      삭제
+                    </button>
+                  </div>
                 </div>
-                <div className="text-xs">
-                  <span className="text-sky-600 font-semibold mr-1">{r.user}</span>
-                  <span className="text-gray-700">{r.place} — {r.item}</span>
-                </div>
-                <div className="font-bold text-sky-700">
-                  ₩{Number(r.amount).toLocaleString("ko-KR")}
+                <div className="flex items-center justify-between">
+                  <div className="text-xs">
+                    <span className="text-sky-600 font-semibold mr-1">{r.user}</span>
+                    <span className="text-gray-700">{r.place} — {r.item}</span>
+                  </div>
+                  <div className="font-bold text-sky-700">
+                    ₩{Number(r.amount).toLocaleString("ko-KR")}
+                  </div>
                 </div>
               </div>
             ))}
@@ -785,6 +849,144 @@ function AddTxModal({ onClose, onSubmit }) {
   );
 }
 
+function EditTxModal({ onClose, onSubmit, initialData }) {
+  const [form, setForm] = useState({
+    date: initialData?.date || "",
+    user: initialData?.user || "지영",
+    category: initialData?.category || "생활",
+    place: initialData?.place || "",
+    item: initialData?.item || "",
+    amount: String(initialData?.amount || ""),
+  });
+
+  const canSubmit =
+    form.date &&
+    form.user &&
+    form.category &&
+    form.place.trim() &&
+    form.item.trim() &&
+    String(form.amount).trim() !== "" &&
+    !Number.isNaN(Number(form.amount));
+
+  const handleChange = (k, v) => setForm((f) => ({ ...f, [k]: v }));
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!canSubmit) return;
+    await onSubmit(initialData.id, {
+      date: form.date,
+      user: form.user,
+      category: form.category,
+      place: form.place,
+      item: form.item,
+      amount: Number(form.amount) || 0,
+    });
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+      <div className="w-full max-w-sm bg-white rounded-3xl shadow-2xl overflow-hidden border-2 border-blue-100">
+        <div className="flex items-center justify-between px-5 py-4 border-b bg-gradient-to-r from-blue-50 to-indigo-50">
+          <div className="font-bold text-blue-700">✏️ 내역 수정</div>
+          <button aria-label="닫기" onClick={onClose} className="w-9 h-9 grid place-items-center rounded-xl hover:bg-white transition">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="p-5 space-y-4 text-sm">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <div className="text-xs font-semibold text-gray-600 mb-2">날짜</div>
+              <input
+                type="date"
+                value={form.date}
+                onChange={(e) => handleChange("date", e.target.value)}
+                className="w-full border-2 border-blue-200 rounded-xl px-3 py-2 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 outline-none"
+              />
+            </div>
+            <div>
+              <div className="text-xs font-semibold text-gray-600 mb-2">사용자</div>
+              <div className="flex items-center gap-2">
+                <label className="inline-flex items-center gap-1 px-3 py-2 bg-blue-50 rounded-xl cursor-pointer hover:bg-blue-100 transition text-xs">
+                  <input type="radio" checked={form.user === "지영"} onChange={() => handleChange("user", "지영")} className="text-blue-500" />
+                  지영
+                </label>
+                <label className="inline-flex items-center gap-1 px-3 py-2 bg-blue-50 rounded-xl cursor-pointer hover:bg-blue-100 transition text-xs">
+                  <input type="radio" checked={form.user === "지원"} onChange={() => handleChange("user", "지원")} className="text-blue-500" />
+                  지원
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div className="text-xs font-semibold text-gray-600 mb-2">카테고리</div>
+            <div className="flex items-center gap-2">
+              <label className="inline-flex items-center gap-2 px-4 py-2 bg-sky-50 rounded-xl cursor-pointer hover:bg-sky-100 transition">
+                <input type="radio" checked={form.category === "생활"} onChange={() => handleChange("category", "생활")} className="text-sky-500" />
+                생활
+              </label>
+              <label className="inline-flex items-center gap-2 px-4 py-2 bg-orange-50 rounded-xl cursor-pointer hover:bg-orange-100 transition">
+                <input type="radio" checked={form.category === "외식"} onChange={() => handleChange("category", "외식")} className="text-orange-500" />
+                외식
+              </label>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <div className="text-xs font-semibold text-gray-600 mb-2">사용처</div>
+              <input
+                type="text"
+                value={form.place}
+                onChange={(e) => handleChange("place", e.target.value)}
+                placeholder="이마트"
+                className="w-full border-2 border-blue-200 rounded-xl px-3 py-2 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 outline-none"
+              />
+            </div>
+            <div>
+              <div className="text-xs font-semibold text-gray-600 mb-2">구매 물건</div>
+              <input
+                type="text"
+                value={form.item}
+                onChange={(e) => handleChange("item", e.target.value)}
+                placeholder="계란"
+                className="w-full border-2 border-blue-200 rounded-xl px-3 py-2 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 outline-none"
+              />
+            </div>
+          </div>
+
+          <div>
+            <div className="text-xs font-semibold text-gray-600 mb-2">금액(원)</div>
+            <input
+              type="number"
+              min={0}
+              inputMode="numeric"
+              value={form.amount}
+              onChange={(e) => handleChange("amount", e.target.value)}
+              placeholder="10000"
+              className="w-full border-2 border-blue-200 rounded-xl px-3 py-2 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 outline-none text-lg font-semibold"
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={!canSubmit}
+            className={`w-full py-3 rounded-2xl text-white font-bold transition shadow-lg ${
+              canSubmit
+                ? "bg-gradient-to-r from-blue-400 to-indigo-500 hover:from-blue-500 hover:to-indigo-600 hover:shadow-xl transform hover:scale-[1.02]"
+                : "bg-gray-300 cursor-not-allowed"
+            }`}
+          >
+            💾 수정하기
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 function DateBreakdown({ selected, tx }) {
   const filtered = tx.filter((t) => String(t.date) === selected);
   const totalBy = filtered.reduce(
@@ -847,7 +1049,7 @@ function summarizeByDate(tx) {
   return map;
 }
 function getWeekStart(d) {
-  const day = (d.getDay() + 6) % 7; // 월요일 시작
+  const day = (d.getDay() + 6) % 7;
   const s = new Date(d);
   s.setDate(d.getDate() - day);
   return s;
