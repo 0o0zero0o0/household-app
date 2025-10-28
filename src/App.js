@@ -25,15 +25,70 @@ function Icon({ name, size = 16 }) {
     strokeLinecap: "round",
     strokeLinejoin: "round",
   };
-  if (name === "plus") return (<svg {...common}><path d="M12 5v14M5 12h14"/></svg>);
-  if (name === "list") return (<svg {...common}><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg>);
-  if (name === "calendar") return (<svg {...common}><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>);
-  if (name === "logout") return (<svg {...common}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>);
-  if (name === "x") return (<svg {...common}><path d="M18 6 6 18M6 6l12 12"/></svg>);
-  if (name === "alert") return (<svg {...common}><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>);
-  if (name === "wallet") return (<svg {...common}><path d="M4 7h16a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2z"/><path d="M16 11h4"/></svg>);
-  if (name === "utensils") return (<svg {...common}><path d="M4 3v7a2 2 0 0 0 2 2h0v9"/><path d="M11 3v7a2 2 0 0 0 2 2h0v9"/><path d="M18 3v18"/></svg>);
-  if (name === "pie") return (<svg {...common}><path d="M21.21 15.89A10 10 0 1 1 12 2v10z"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>);
+  if (name === "plus")
+    return (
+      <svg {...common}>
+        <path d="M12 5v14M5 12h14" />
+      </svg>
+    );
+  if (name === "list")
+    return (
+      <svg {...common}>
+        <path d="M8 6h13M8 12h13M8 18h13" />
+        <path d="M3 6h.01M3 12h.01M3 18h.01" />
+      </svg>
+    );
+  if (name === "calendar")
+    return (
+      <svg {...common}>
+        <rect x="3" y="4" width="18" height="18" rx="2" />
+        <path d="M16 2v4M8 2v4M3 10h18" />
+      </svg>
+    );
+  if (name === "logout")
+    return (
+      <svg {...common}>
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+        <path d="M16 17l5-5-5-5" />
+        <path d="M21 12H9" />
+      </svg>
+    );
+  if (name === "x")
+    return (
+      <svg {...common}>
+        <path d="M18 6 6 18M6 6l12 12" />
+      </svg>
+    );
+  if (name === "alert")
+    return (
+      <svg {...common}>
+        <path d="M12 9v4" />
+        <path d="M12 17h.01" />
+        <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+      </svg>
+    );
+  if (name === "wallet")
+    return (
+      <svg {...common}>
+        <path d="M4 7h16a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2z" />
+        <path d="M16 11h4" />
+      </svg>
+    );
+  if (name === "utensils")
+    return (
+      <svg {...common}>
+        <path d="M4 3v7a2 2 0 0 0 2 2h0v9" />
+        <path d="M11 3v7a2 2 0 0 0 2 2h0v9" />
+        <path d="M18 3v18" />
+      </svg>
+    );
+  if (name === "pie")
+    return (
+      <svg {...common}>
+        <path d="M21.21 15.89A10 10 0 1 1 12 2v10z" />
+        <path d="M22 12A10 10 0 0 0 12 2v10z" />
+      </svg>
+    );
   return null;
 }
 
@@ -47,16 +102,16 @@ function Logo({ className = "", color = "#189EFF" }) {
       aria-label="TwinWallet logo"
     >
       <g fill={color}>
-        <path d="m41.372,12.494h-15.398v38.004h-10.575V12.494H0V3.141h41.372v9.353Z"/>
-        <path d="m94.553,16.446l-11.39,34.052h-10.401l-6.16-19.465-6.101,19.465h-10.345l-11.387-34.052h10.924l6.042,21.906,5.927-21.906h10.578l5.983,22.024,6.045-22.024h10.286Z"/>
-        <path d="m110.782,6.334c0,3.663-2.671,6.334-6.334,6.334s-6.334-2.671-6.334-6.334,2.674-6.334,6.334-6.334,6.334,2.674,6.334,6.334Zm-1.163,44.279h-10.342V16.446h10.342v34.167Z"/>
-        <path d="m117.411,16.446h10.342v3.486c2.037-2.73,5.174-4.3,9.531-4.3,7.904,0,13.309,5.752,13.309,15.168v19.699h-10.345v-17.957c0-5.171-2.093-8.016-5.986-8.016-4.067,0-6.508,3.193-6.508,8.483v17.491h-10.342V16.446Z"/>
-        <path d="m216.147,3.141l-13.654,47.357h-10.693l-8.483-29.692-8.483,29.692h-10.694l-13.654-47.357h11.331l8.134,30.97,8.134-30.97h10.983l8.078,30.855,8.194-30.855h10.806Z"/>
-        <path d="m215.35,33.47c0-10.342,6.801-17.839,16.561-17.839,4.475,0,7.73,1.57,9.764,4.3v-3.486h10.342v34.052h-10.342v-3.486c-2.034,2.73-5.289,4.3-9.764,4.3-9.761,0-16.561-7.497-16.561-17.842Zm26.499,0c0-5.227-3.256-9.005-8.308-9.005-4.941,0-8.078,3.778-8.078,9.005s3.137,9.008,8.078,9.008c5.053,0,8.308-3.778,8.308-9.008Z"/>
-        <path d="m270.158,50.498h-10.342V1.685h10.342v48.813Z"/>
-        <path d="m288.293,50.498h-10.342V1.685h10.342v48.813Z"/>
-        <path d="m294.341,33.47c0-10.342,7.323-17.839,17.724-17.839s17.724,7.438,17.724,17.839c0,.989-.059,2.093-.233,3.315h-24.929c.815,3.949,3.545,6.216,7.438,6.216,2.963,0,5.404-1.045,6.275-2.671h10.401c-1.741,6.508-8.424,10.983-16.676,10.983-10.401,0-17.724-7.438-17.724-17.842Zm25.336-3.368c-.871-4.07-3.545-6.278-7.612-6.278s-6.623,2.208-7.497,6.278h15.109Z"/>
-        <path d="m356.008,25.336h-6.741v25.162h-10.342v-25.162h-6.741v-8.89h6.741V6.334h10.342v10.112h6.741v8.89Z"/>
+        <path d="m41.372,12.494h-15.398v38.004h-10.575V12.494H0V3.141h41.372v9.353Z" />
+        <path d="m94.553,16.446l-11.39,34.052h-10.401l-6.16-19.465-6.101,19.465h-10.345l-11.387-34.052h10.924l6.042,21.906,5.927-21.906h10.578l5.983,22.024,6.045-22.024h10.286Z" />
+        <path d="m110.782,6.334c0,3.663-2.671,6.334-6.334,6.334s-6.334-2.671-6.334-6.334,2.674-6.334,6.334-6.334,6.334,2.674,6.334,6.334Zm-1.163,44.279h-10.342V16.446h10.342v34.167Z" />
+        <path d="m117.411,16.446h10.342v3.486c2.037-2.73,5.174-4.3,9.531-4.3,7.904,0,13.309,5.752,13.309,15.168v19.699h-10.345v-17.957c0-5.171-2.093-8.016-5.986-8.016-4.067,0-6.508,3.193-6.508,8.483v17.491h-10.342V16.446Z" />
+        <path d="m216.147,3.141l-13.654,47.357h-10.693l-8.483-29.692-8.483,29.692h-10.694l-13.654-47.357h11.331l8.134,30.97,8.134-30.97h10.983l8.078,30.855,8.194-30.855h10.806Z" />
+        <path d="m215.35,33.47c0-10.342,6.801-17.839,16.561-17.839,4.475,0,7.73,1.57,9.764,4.3v-3.486h10.342v34.052h-10.342v-3.486c-2.034,2.73-5.289,4.3-9.764,4.3-9.761,0-16.561-7.497-16.561-17.842Zm26.499,0c0-5.227-3.256-9.005-8.308-9.005-4.941,0-8.078,3.778-8.078,9.005s3.137,9.008,8.078,9.008c5.053,0,8.308-3.778,8.308-9.008Z" />
+        <path d="m270.158,50.498h-10.342V1.685h10.342v48.813Z" />
+        <path d="m288.293,50.498h-10.342V1.685h10.342v48.813Z" />
+        <path d="m294.341,33.47c0-10.342,7.323-17.839,17.724-17.839s17.724,7.438,17.724,17.839c0,.989-.059,2.093-.233,3.315h-24.929c.815,3.949,3.545,6.216,7.438,6.216,2.963,0,5.404-1.045,6.275-2.671h10.401c-1.741,6.508-8.424,10.983-16.676,10.983-10.401,0-17.724-7.438-17.724-17.842Zm25.336-3.368c-.871-4.07-3.545-6.278-7.612-6.278s-6.623,2.208-7.497,6.278h15.109Z" />
+        <path d="m356.008,25.336h-6.741v25.162h-10.342v-25.162h-6.741v-8.89h6.741V6.334h10.342v10.112h6.741v8.89Z" />
       </g>
     </svg>
   );
@@ -67,7 +122,9 @@ export default function App() {
   /* auth */
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     try {
-      return typeof window !== "undefined" && localStorage.getItem("auth") === "1";
+      return (
+        typeof window !== "undefined" && localStorage.getItem("auth") === "1"
+      );
     } catch {
       return false;
     }
@@ -103,26 +160,16 @@ export default function App() {
 
   async function deleteTx(id) {
     if (!window.confirm("정말 삭제하시겠습니까?")) return;
-    try {
-      await deleteDoc(doc(db, "tx", id));
-      await loadTx();
-    } catch (err) {
-      console.error("삭제 실패:", err);
-      alert("삭제에 실패했습니다.");
-    }
+    await deleteDoc(doc(db, "tx", id));
+    await loadTx();
   }
 
   async function updateTx(id, record) {
-    try {
-      await updateDoc(doc(db, "tx", id), {
-        ...record,
-        amount: Number(record.amount) || 0,
-      });
-      await loadTx();
-    } catch (err) {
-      console.error("수정 실패:", err);
-      alert("수정에 실패했습니다.");
-    }
+    await updateDoc(doc(db, "tx", id), {
+      ...record,
+      amount: Number(record.amount) || 0,
+    });
+    await loadTx();
   }
 
   const handlePasswordSubmit = (e) => {
@@ -142,7 +189,9 @@ export default function App() {
   const logout = () => {
     try {
       localStorage.removeItem("auth");
-    } catch {}
+    } catch (error) {
+      console.error("Error removing auth from localStorage:", error);
+    }
     setIsAuthenticated(false);
   };
 
@@ -158,7 +207,10 @@ export default function App() {
 
   const monthKey = useMemo(() => {
     const now = new Date();
-    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(
+      2,
+      "0"
+    )}`;
   }, []);
 
   const spent = useMemo(() => {
@@ -185,16 +237,29 @@ export default function App() {
   /* 로그인 화면 */
   if (!isAuthenticated) {
     return (
-      <div className="app-bg center">
-        <div className="card-lg">
-          <div className="center mb16">
-            <Logo color="#189EFF" />
+      <div className="min-h-screen via-white bg-gradient-to-br from-blue-50 to-sky-50 flex items-center justify-center p-4">
+        <div
+          className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-24 border-2"
+          style={{ padding: "2rem" }}
+        >
+          <div className="flex justify-center" style={{ marginBottom: "1.5rem" }}>
+            <Logo className="" color="#189EFF" />
           </div>
 
-          <h2 className="title center mb4">🔐 환영합니다!</h2>
-          <p className="sub center mb12">비밀번호를 입력해주세요</p>
+          <h2
+            className="text-center text-lg font-bold text-gray-800"
+            style={{ marginBottom: ".25rem" }}
+          >
+            🔐 환영합니다!
+          </h2>
+          <p
+            className="text-center text-sm text-gray-500"
+            style={{ marginBottom: "1rem" }}
+          >
+            비밀번호를 입력해주세요
+          </p>
 
-          <form onSubmit={handlePasswordSubmit} className="col gap12">
+          <form onSubmit={handlePasswordSubmit} className="space-y-4">
             <div>
               <input
                 type="password"
@@ -205,13 +270,22 @@ export default function App() {
                 autoFocus
               />
               {passwordError && (
-                <p className="err">
-                  <Icon name="alert" size={16} />
-                  비밀번호가 올바르지 않습니다
+                <p
+                  className="text-red-500 text-sm"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    marginTop: "8px",
+                  }}
+                >
+                  <Icon name="alert" size={16} /> 비밀번호가 올바르지 않습니다
                 </p>
               )}
             </div>
-            <button type="submit" className="button w100">확인</button>
+            <button type="submit" className="button" style={{ width: "100%" }}>
+              확인
+            </button>
           </form>
         </div>
       </div>
@@ -220,28 +294,54 @@ export default function App() {
 
   /* 메인 화면 */
   return (
-    <div className="app-bg">
-      <div className="shell">
+    <div className="min-h-screen via-white bg-gradient-to-br from-blue-50 to-sky-50 text-gray-900 flex items-start justify-center p-4 pt-4">
+      <div className="w-full max-w-md flex flex-col items-center gap-4">
         {/* 상단바 */}
-        <div className="topbar">
-          <div className="row gap4">
-            <button aria-label="내역 작성" onClick={() => setOpenAdd(true)} className="iconbtn primary">
+        <div
+          className="w-full"
+          style={{
+            position: "relative",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "4px 4px 0",
+          }}
+        >
+          <div className="flex items-center gap-1">
+            <button
+              aria-label="내역 작성"
+              onClick={() => setOpenAdd(true)}
+              className="iconbtn primary"
+            >
               <Icon name="plus" />
             </button>
-            <button aria-label="내 기록 목록" onClick={() => setOpenList(true)} className="iconbtn ghost">
+            <button
+              aria-label="내 기록 목록"
+              onClick={() => setOpenList(true)}
+              className="iconbtn ghost"
+            >
               <Icon name="list" />
             </button>
           </div>
 
-          <div className="logo-wrap">
-            <Logo color="#189EFF" />
+          <div style={{ position: "absolute", left: "50%", transform: "translateX(-50%)" }}>
+            <Logo className="" color="#189EFF" />
           </div>
 
-          <div className="row gap4">
-            <button aria-label="달력 열기" onClick={() => setOpenCalendar(true)} className="iconbtn ghost">
+          <div className="flex items-center gap-1">
+            <button
+              aria-label="달력 열기"
+              onClick={() => setOpenCalendar(true)}
+              className="iconbtn ghost"
+            >
               <Icon name="calendar" />
             </button>
-            <button aria-label="로그아웃" onClick={logout} className="iconbtn danger" title="로그아웃">
+            <button
+              aria-label="로그아웃"
+              onClick={logout}
+              className="iconbtn danger"
+              title="로그아웃"
+            >
               <Icon name="logout" />
             </button>
           </div>
@@ -249,19 +349,35 @@ export default function App() {
 
         {/* 알림 */}
         {alerts.length > 0 && (
-          <div className="notice">
-            <div className="row gap8 mb8">
-              <div className="notice-ico"><Icon name="alert" /></div>
+          <div
+            className="w-full bg-white rounded-2xl border-2 shadow-md"
+            style={{ padding: "16px", borderColor: "#fde68a" }}
+          >
+            <div className="flex items-center gap-2" style={{ marginBottom: "8px" }}>
+              <div
+                style={{
+                  width: 32,
+                  height: 32,
+                  background: "#FEF3C7",
+                  borderRadius: 999,
+                  display: "grid",
+                  placeItems: "center",
+                }}
+              >
+                <Icon name="alert" />
+              </div>
               <strong className="text-base">알림</strong>
             </div>
             {alerts.map((a, i) => (
-              <p key={i} className="text-sm ml40">• {a}</p>
+              <p key={i} className="text-sm" style={{ marginLeft: "40px" }}>
+                • {a}
+              </p>
             ))}
           </div>
         )}
 
         {/* 사용자 카드 */}
-        <div className="grid">
+        <div className="w-full" style={{ display: "grid", gridTemplateColumns: "1fr", gap: "16px" }}>
           <UserCard
             name="지영"
             living={spent.지영.생활}
@@ -270,7 +386,10 @@ export default function App() {
             diningLimit={LIMITS.jiyoung.diningLimit}
           />
         </div>
-        <div className="grid mtneg8">
+        <div
+          className="w-full"
+          style={{ display: "grid", gridTemplateColumns: "1fr", gap: "16px", marginTop: "-8px" }}
+        >
           <UserCard
             name="지원"
             living={spent.지원.생활}
@@ -281,7 +400,7 @@ export default function App() {
         </div>
 
         {/* 액션 */}
-        <div className="col gap12 w100">
+        <div className="w-full" style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
           <ActionCard icon={<Icon name="pie" />} text="월말 요약 보기" onClick={() => setOpenEom(true)} />
         </div>
       </div>
@@ -321,35 +440,64 @@ function UserCard({ name, living, livingLimit, dining, diningLimit }) {
   const leftDining = Math.max(0, diningLimit - dining);
 
   return (
-    <div className="card">
-      <h3 className="card-title">💙 {name}</h3>
+    <div
+      className="bg-white shadow-md border-2 rounded-2xl"
+      style={{ padding: "16px", borderColor: "#bae6fd" }}
+    >
+      <h3 className="text-base font-bold" style={{ color: "#0284c7", marginBottom: "12px" }}>
+        💙 {name}
+      </h3>
 
-      <div className="mb12">
-        <div className="row gap8 title-sky mb8">
-          <div className="pill-sky">
+      <div style={{ marginBottom: "12px" }}>
+        <div className="flex items-center gap-2" style={{ color: "#0284c7", marginBottom: "8px" }}>
+          <div
+            style={{
+              width: 24,
+              height: 24,
+              background: "#f0f9ff",
+              borderRadius: 8,
+              display: "grid",
+              placeItems: "center",
+            }}
+          >
             <Icon name="wallet" size={14} />
           </div>
-          <span className="text-sm fw600">생활비</span>
+          <span className="text-sm font-semibold">생활비</span>
         </div>
         <ProgressBar value={(living / livingLimit) * 100} color="sky" />
-        <p className="muted mt8">
+        <p className="text-xs text-gray-600" style={{ marginTop: "8px" }}>
           {living.toLocaleString()} / {livingLimit.toLocaleString()}원
         </p>
-        <p className="left-money">💰 남은 금액: {leftLiving.toLocaleString()}원</p>
+        <p className="text-xs" style={{ color: "#16a34a", fontWeight: 700 }}>
+          💰 남은 금액: {leftLiving.toLocaleString()}원
+        </p>
       </div>
 
       <div>
-        <div className="row gap8 title-orange mb8">
-          <div className="pill-orange">
+        <div className="flex items-center gap-2" style={{ color: "#ea580c", marginBottom: "8px" }}>
+          <div
+            style={{
+              width: 24,
+              height: 24,
+              background: "#fff7ed",
+              borderRadius: 8,
+              display: "grid",
+              placeItems: "center",
+            }}
+          >
             <Icon name="utensils" size={14} />
           </div>
-          <span className="text-sm fw600">외식비</span>
         </div>
+        <span className="text-sm font-semibold" style={{ color: "#ea580c" }}>
+          외식비
+        </span>
         <ProgressBar value={(dining / diningLimit) * 100} color="orange" />
-        <p className="muted mt8">
+        <p className="text-xs text-gray-600" style={{ marginTop: "8px" }}>
           {dining.toLocaleString()} / {diningLimit.toLocaleString()}원
         </p>
-        <p className="left-money">💰 남은 금액: {leftDining.toLocaleString()}원</p>
+        <p className="text-xs" style={{ color: "#16a34a", fontWeight: 700 }}>
+          💰 남은 금액: {leftDining.toLocaleString()}원
+        </p>
       </div>
     </div>
   );
@@ -385,9 +533,32 @@ function ProgressBar({ value, color = "sky" }) {
 
 function ActionCard({ icon, text, onClick }) {
   return (
-    <button className="action" onClick={onClick}>
-      <div className="action-ico">{icon}</div>
-      <p className="text-sm fw600 text-900">{text}</p>
+    <button
+      onClick={onClick}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "12px",
+        padding: "12px 16px",
+        background: "linear-gradient(90deg,#faf5ff,#fdf2f8)",
+        borderRadius: "1rem",
+        border: "2px solid #e9d5ff",
+      }}
+    >
+      <div
+        style={{
+          width: 36,
+          height: 36,
+          background: "#fff",
+          color: "#8b5cf6",
+          borderRadius: 12,
+          display: "grid",
+          placeItems: "center",
+        }}
+      >
+        {icon}
+      </div>
+      <p className="text-sm font-semibold text-gray-800">{text}</p>
     </button>
   );
 }
@@ -395,7 +566,9 @@ function ActionCard({ icon, text, onClick }) {
 /* ------------------------------ 달력 모달 ------------------------------ */
 function CalendarModal({ onClose, tx }) {
   const today = new Date();
-  const [cursor, setCursor] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
+  const [cursor, setCursor] = useState(
+    new Date(today.getFullYear(), today.getMonth(), 1)
+  );
   const [selected, setSelected] = useState(formatDate(today));
   const { year, month, grid } = useMemo(() => buildMonthGrid(cursor), [cursor]);
   const daily = useMemo(() => summarizeByDate(tx), [tx]);
@@ -411,37 +584,54 @@ function CalendarModal({ onClose, tx }) {
         </div>
 
         <div className="modal-body">
-          <div className="row between mb12">
+          <div
+            className="flex items-center justify-between"
+            style={{ marginBottom: "12px" }}
+          >
             <button
               className="btn-mini"
               onClick={() =>
-                setCursor(new Date(cursor.getFullYear(), cursor.getMonth() - 1, 1))
+                setCursor(
+                  new Date(cursor.getFullYear(), cursor.getMonth() - 1, 1)
+                )
               }
             >
               ◀
             </button>
-            <div className="text-lg fw700">
+            <div className="font-bold text-lg">
               {year}년 {month + 1}월
             </div>
             <button
               className="btn-mini"
               onClick={() =>
-                setCursor(new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1))
+                setCursor(
+                  new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1)
+                )
               }
             >
               ▶
             </button>
           </div>
 
-          <div className="cal-head">
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(7,1fr)",
+              textAlign: "center",
+              fontSize: 12,
+              color: "#6b7280",
+              fontWeight: 700,
+              marginBottom: "8px",
+            }}
+          >
             {["일", "월", "화", "수", "목", "금", "토"].map((d) => (
-              <div key={d} className="cal-head-cell">
+              <div key={d} style={{ padding: "8px 0" }}>
                 {d}
               </div>
             ))}
           </div>
 
-          <div className="cal-grid">
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(7,1fr)", gap: "6px" }}>
             {grid.map((cell, idx) => {
               if (!cell) return <div key={idx} style={{ height: 44 }} />;
               const iso = formatDate(cell);
@@ -453,19 +643,70 @@ function CalendarModal({ onClose, tx }) {
                 <button
                   key={idx}
                   onClick={() => setSelected(iso)}
-                  className={`cal-cell ${isSelected ? "sel" : ""}`}
+                  style={{
+                    height: 44,
+                    border: "2px solid",
+                    borderColor: isSelected ? "#7dd3fc" : "transparent",
+                    borderRadius: 12,
+                    position: "relative",
+                    background: isSelected ? "#f0f9ff" : "white",
+                    fontWeight: 600,
+                    color: isSelected ? "#0369a1" : "#111827",
+                  }}
                 >
-                  <div className={`cal-num ${isToday ? "today" : ""}`}>
-                    {cell.getDate()}
+                  <div
+                    style={{
+                      display: "grid",
+                      placeItems: "center",
+                      height: "100%",
+                      position: "relative",
+                    }}
+                  >
+                    <span style={{ position: "relative", color: isToday ? "white" : undefined }}>
+                      {cell.getDate()}
+                      {isToday && (
+                        <span
+                          style={{
+                            position: "absolute",
+                            inset: 0,
+                            zIndex: -1,
+                            background: "linear-gradient(135deg,#38bdf8,#3b82f6)",
+                            borderRadius: 999,
+                          }}
+                        />
+                      )}
+                    </span>
                   </div>
-                  {sum > 0 && <span className="cal-dot" />}
+                  {sum > 0 && (
+                    <span
+                      style={{
+                        position: "absolute",
+                        bottom: 6,
+                        left: "50%",
+                        transform: "translateX(-50%)",
+                        width: 6,
+                        height: 6,
+                        background: "#22c55e",
+                        borderRadius: 999,
+                      }}
+                    />
+                  )}
                 </button>
               );
             })}
           </div>
 
-          <div className="cal-bottom">
-            <div className="cal-bottom-title">
+          <div
+            style={{
+              marginTop: "16px",
+              borderTop: "2px solid #bae6fd",
+              paddingTop: "12px",
+              background: "#f0f9ff",
+              borderRadius: 12,
+              padding: "12px",
+            }}
+          >
+            <div className="font-bold" style={{ color: "#0369a1", marginBottom: "8px" }}>
               {selected.replaceAll("-", ".")} 사용 내역
             </div>
             <DateBreakdown selected={selected} tx={tx} />
@@ -476,7 +717,7 @@ function CalendarModal({ onClose, tx }) {
   );
 }
 
-/* ✅ DateBreakdown 컴포넌트 */
+/* -------------------- DateBreakdown -------------------- */
 function DateBreakdown({ selected, tx }) {
   const filtered = tx.filter((t) => String(t.date) === selected);
   const totalBy = filtered.reduce(
@@ -490,30 +731,27 @@ function DateBreakdown({ selected, tx }) {
   );
 
   return (
-    <div className="col gap6">
-      <div className="row between">
-        <span className="text-sky fw600">지영</span>
-        <span className="fw700">
-          ₩{totalBy.byUser.지영.toLocaleString("ko-KR")}
-        </span>
+    <div className="space-y-2">
+      <div className="flex items-center justify-between">
+        <span className="text-sky-600 font-semibold">지영</span>
+        <span className="font-bold">₩{totalBy.byUser.지영.toLocaleString("ko-KR")}</span>
       </div>
-      <div className="row between">
-        <span className="text-sky fw600">지원</span>
-        <span className="fw700">
-          ₩{totalBy.byUser.지원.toLocaleString("ko-KR")}
-        </span>
+      <div className="flex items-center justify-between">
+        <span className="text-sky-600 font-semibold">지원</span>
+        <span className="font-bold">₩{totalBy.byUser.지원.toLocaleString("ko-KR")}</span>
       </div>
-      <div className="row between total-line">
+      <div
+        className="flex items-center justify-between"
+        style={{ fontWeight: 800, fontSize: "1rem", paddingTop: "8px", borderTop: "2px solid #bae6fd" }}
+      >
         <span>합계</span>
-        <span className="text-sky-strong">
-          ₩{totalBy.total.toLocaleString("ko-KR")}
-        </span>
+        <span style={{ color: "#0284c7" }}>₩{totalBy.total.toLocaleString("ko-KR")}</span>
       </div>
     </div>
   );
 }
 
-/* ------------------------------ 목록 모달 (수정/삭제 포함) ------------------------------ */
+/* ------------------------------ 목록 모달 (수정/삭제만 소형) ------------------------------ */
 function ListModal({ onClose, tx, onDelete, onEdit }) {
   const today = new Date();
   const [who, setWho] = useState("all");
@@ -541,6 +779,36 @@ function ListModal({ onClose, tx, onDelete, onEdit }) {
 
   const total = rows.reduce((s, r) => s + (Number(r.amount) || 0), 0);
 
+  // 공통 소형 버튼 스타일 (수정/삭제 전용)
+  const smallBtnBase = {
+    padding: "3px 8px 1px 8px", // 총 높이 4px, 텍스트 2px 위로(Top 3 / Bottom 1)
+    borderWidth: "1px",
+    borderStyle: "solid",
+    borderRadius: "8px",
+    fontSize: "11px",
+    fontWeight: 600,
+    lineHeight: 1,
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "4px",
+    whiteSpace: "nowrap",
+  };
+
+  const editBtnStyle = {
+    ...smallBtnBase,
+    background: "#eef2ff",
+    color: "#3730a3",
+    borderColor: "#c7d2fe",
+  };
+
+  const delBtnStyle = {
+    ...smallBtnBase,
+    background: "#fee2e2",
+    color: "#b91c1c",
+    borderColor: "#fecaca",
+  };
+
   return (
     <div className="modal-overlay">
       <div className="modal">
@@ -553,103 +821,129 @@ function ListModal({ onClose, tx, onDelete, onEdit }) {
 
         <div className="modal-body">
           {/* 필터 */}
-          <div className="mb12">
-            <div className="label">이름</div>
-            <div className="row gap8">
+          <div style={{ marginBottom: "12px" }}>
+            <div className="text-xs font-semibold text-gray-600" style={{ marginBottom: "6px" }}>
+              이름
+            </div>
+            <div className="flex items-center gap-2">
               {[
                 { label: "전체", value: "all" },
                 { label: "지영", value: "지영" },
                 { label: "지원", value: "지원" },
               ].map((opt) => (
-                <label key={opt.value} className="chip">
-                  <input
-                    type="radio"
-                    checked={who === opt.value}
-                    onChange={() => setWho(opt.value)}
-                  />
+                <label
+                  key={opt.value}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    padding: "6px 10px",
+                    background: "#f0f9ff",
+                    borderRadius: 12,
+                    cursor: "pointer",
+                  }}
+                >
+                  <input type="radio" checked={who === opt.value} onChange={() => setWho(opt.value)} />
                   {opt.label}
                 </label>
               ))}
             </div>
           </div>
 
-          <div className="mb12">
-            <div className="label">기간</div>
-            <div className="row gap8 wrap">
+          <div style={{ marginBottom: "12px" }}>
+            <div className="text-xs font-semibold text-gray-600" style={{ marginBottom: "6px" }}>
+              기간
+            </div>
+            <div className="flex items-center gap-2" style={{ flexWrap: "wrap" }}>
               {[
                 { label: "이번 주", value: "week" },
                 { label: "이번 달", value: "month" },
                 { label: "직접 설정", value: "custom" },
               ].map((opt) => (
-                <label key={opt.value} className="chip">
-                  <input
-                    type="radio"
-                    checked={period === opt.value}
-                    onChange={() => applyPreset(opt.value)}
-                  />
+                <label
+                  key={opt.value}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    padding: "6px 10px",
+                    background: "#f0f9ff",
+                    borderRadius: 12,
+                    cursor: "pointer",
+                  }}
+                >
+                  <input type="radio" checked={period === opt.value} onChange={() => applyPreset(opt.value)} />
                   {opt.label}
                 </label>
               ))}
             </div>
 
             {period === "custom" && (
-              <div className="grid2 mt8">
-                <input
-                  type="date"
-                  value={start}
-                  onChange={(e) => setStart(e.target.value)}
-                  className="date"
-                />
-                <input
-                  type="date"
-                  value={end}
-                  onChange={(e) => setEnd(e.target.value)}
-                  className="date"
-                />
+              <div style={{ marginTop: "8px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
+                <input type="date" value={start} onChange={(e) => setStart(e.target.value)} className="date" />
+                <input type="date" value={end} onChange={(e) => setEnd(e.target.value)} className="date" />
               </div>
             )}
           </div>
 
           {/* 리스트 */}
-          <div className="listbox">
+          <div style={{ border: "2px solid #bae6fd", borderRadius: "1rem", maxHeight: "320px", overflow: "auto" }}>
             {rows.length === 0 && (
-              <div className="empty">해당 기간 내 기록 없음</div>
+              <div style={{ padding: "16px", textAlign: "center", color: "#9ca3af" }}>해당 기간 내 기록 없음</div>
             )}
-
             {rows.map((r) => (
-              <div key={r.id || `${r.date}-${r.item}-${r.amount}`} className="rowline">
-                <div className="row-date">
-                  {String(r.date).replaceAll("-", ".")}
-                </div>
+              <div key={r.id || `${r.date}-${r.item}-${r.amount}`} className="row">
+                <div className="row-date">{String(r.date).replaceAll("-", ".")}</div>
 
-                <div className="row-main">
-                  <div className="row-text">
-                    <span className="user-tag">{r.user}</span>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: "8px",
+                    minWidth: 0,
+                  }}
+                >
+                  <div className="text-xs" style={{ color: "#111827", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    <span className="text-sky-600" style={{ fontWeight: 700, marginRight: 4 }}>
+                      {r.user}
+                    </span>
                     {r.place} — {r.item}
                   </div>
-                  <div className="row-money">
+
+                  <div className="row-actions" style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <button style={editBtnStyle} onClick={() => onEdit(r)}>
+                      <span style={{ display: "inline-block" }}>수정</span>
+                    </button>
+                    <button style={delBtnStyle} onClick={() => onDelete(r.id)}>
+                      <span style={{ display: "inline-block" }}>삭제</span>
+                    </button>
+                  </div>
+
+                  <div className="row-amount" style={{ fontWeight: 700, color: "#0369a1", marginLeft: "auto" }}>
                     ₩{Number(r.amount).toLocaleString("ko-KR")}
                   </div>
-                </div>
-
-                {/* ✅ 작게/슬림하게 바꾼 버튼들 */}
-                <div className="row-actions">
-                  <button className="btn-mini edit" onClick={() => onEdit(r)}>
-                    수정
-                  </button>
-                  <button className="btn-mini del" onClick={() => onDelete(r.id)}>
-                    삭제
-                  </button>
                 </div>
               </div>
             ))}
           </div>
 
-          <div className="sumline">
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              fontWeight: 800,
+              fontSize: "1rem",
+              background: "linear-gradient(90deg,#f0f9ff,#eff6ff)",
+              padding: "12px 16px",
+              borderRadius: "1rem",
+              border: "2px solid #bae6fd",
+              marginTop: "12px",
+            }}
+          >
             <span>합계</span>
-            <span className="text-sky-strong">
-              ₩{total.toLocaleString("ko-KR")}
-            </span>
+            <span style={{ color: "#0284c7" }}>₩{total.toLocaleString("ko-KR")}</span>
           </div>
         </div>
       </div>
@@ -679,68 +973,74 @@ function EomSummaryModal({ onClose, tx }) {
 
   return (
     <div className="modal-overlay">
-      <div className="modal purple">
-        <div className="modal-head">
-          <div>📊 월말 요약</div>
+      <div className="modal" style={{ maxWidth: 420 }}>
+        <div className="modal-head" style={{ borderColor: "#e9d5ff", background: "linear-gradient(90deg,#faf5ff,#fdf2f8)" }}>
+          <div className="font-bold" style={{ color: "#7e22ce" }}>
+            📊 월말 요약
+          </div>
           <button className="iconbtn" onClick={onClose}>
             <Icon name="x" />
           </button>
         </div>
 
-        <div className="modal-body">
-          <div className="sumcard">
+        <div className="p-5 text-sm space-y-4">
+          <div
+            className="flex items-center justify-between font-bold text-lg"
+            style={{
+              background: "linear-gradient(90deg,#f0f9ff,#eff6ff)",
+              padding: "16px",
+              borderRadius: "1rem",
+              border: "2px solid #bae6fd",
+            }}
+          >
             <span>💸 이번 달 총 사용</span>
-            <span className="text-sky-strong">
-              ₩{totals.total.toLocaleString("ko-KR")}
-            </span>
+            <span style={{ color: "#0369a1" }}>₩{totals.total.toLocaleString("ko-KR")}</span>
           </div>
 
-          <div className="grid2 gap12">
-            <div className="box sky">
-              <div className="box-title">👥 사용자별</div>
-              <div className="row between mb6">
-                <span className="muted-600">지영</span>
-                <span className="fw600">
-                  ₩{totals.byUser.지영.toLocaleString("ko-KR")}
-                </span>
+          <div className="grid grid-cols-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+            <div style={{ border: "2px solid #bae6fd", borderRadius: "1rem", padding: "16px", background: "#f0f9ff" }}>
+              <div className="font-bold" style={{ color: "#0369a1", marginBottom: "12px" }}>
+                👥 사용자별
               </div>
-              <div className="row between">
-                <span className="muted-600">지원</span>
-                <span className="fw600">
-                  ₩{totals.byUser.지원.toLocaleString("ko-KR")}
-                </span>
+              <div className="flex items-center justify-between" style={{ marginBottom: "8px" }}>
+                <span className="text-gray-600">지영</span>
+                <span className="font-semibold">₩{totals.byUser.지영.toLocaleString("ko-KR")}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-gray-600">지원</span>
+                <span className="font-semibold">₩{totals.byUser.지원.toLocaleString("ko-KR")}</span>
               </div>
             </div>
 
-            <div className="box orange">
-              <div className="box-title">📑 카테고리별</div>
-              <div className="row between mb6">
-                <span className="muted-600">생활</span>
-                <span className="fw600">
-                  ₩{(totals.byCategory.생활 || 0).toLocaleString("ko-KR")}
-                </span>
+            <div style={{ border: "2px solid #fed7aa", borderRadius: "1rem", padding: "16px", background: "#ffedd5" }}>
+              <div className="font-bold" style={{ color: "#9a3412", marginBottom: "12px" }}>
+                📑 카테고리별
               </div>
-              <div className="row between">
-                <span className="muted-600">외식</span>
-                <span className="fw600">
-                  ₩{(totals.byCategory.외식 || 0).toLocaleString("ko-KR")}
-                </span>
+              <div className="flex items-center justify-between" style={{ marginBottom: "8px" }}>
+                <span className="text-gray-600">생활</span>
+                <span className="font-semibold">₩{(totals.byCategory.생활 || 0).toLocaleString("ko-KR")}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-gray-600">외식</span>
+                <span className="font-semibold">₩{(totals.byCategory.외식 || 0).toLocaleString("ko-KR")}</span>
               </div>
             </div>
           </div>
 
-          <div className="box purple mt12">
-            <div className="box-title">🏆 어디서 많이 썼나요? (Top 3)</div>
-            {topPlaces.length === 0 && (
-              <div className="empty">데이터 없음</div>
-            )}
+          <div style={{ border: "2px solid #e9d5ff", borderRadius: "1rem", padding: "16px", background: "#f3e8ff" }}>
+            <div className="font-bold" style={{ color: "#7e22ce", marginBottom: "12px" }}>
+              🏆 어디서 많이 썼나요? (Top 3)
+            </div>
+            {topPlaces.length === 0 && <div className="text-gray-400" style={{ textAlign: "center", padding: "8px 0" }}>데이터 없음</div>}
             {topPlaces.map(([place, amt], idx) => (
-              <div key={place} className="row between mb6">
-                <span className="muted-600">
-                  <span className="rank">{idx + 1}.</span>
+              <div key={place} className="flex items-center justify-between" style={{ marginBottom: "8px" }}>
+                <span className="text-gray-600">
+                  <span className="inline-block" style={{ width: 24, fontWeight: 700, color: "#7e22ce" }}>
+                    {idx + 1}.
+                  </span>
                   {place}
                 </span>
-                <span className="fw600">₩{amt.toLocaleString("ko-KR")}</span>
+                <span className="font-semibold">₩{amt.toLocaleString("ko-KR")}</span>
               </div>
             ))}
           </div>
@@ -750,7 +1050,7 @@ function EomSummaryModal({ onClose, tx }) {
   );
 }
 
-/* ------------------------------ 추가/수정 모달 ------------------------------ */
+/* ------------------------------ 작성 모달 ------------------------------ */
 function AddTxModal({ onClose, onSubmit }) {
   const todayIso = formatDate(new Date());
   const [form, setForm] = useState({
@@ -790,10 +1090,12 @@ function AddTxModal({ onClose, onSubmit }) {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="modal-body col gap12">
-          <div className="grid2 gap8">
+        <form onSubmit={handleSubmit} className="p-5 space-y-4 text-sm">
+          <div className="grid grid-cols-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
             <div>
-              <div className="label">날짜</div>
+              <div className="text-xs font-semibold text-gray-600" style={{ marginBottom: "6px" }}>
+                날짜
+              </div>
               <input
                 type="date"
                 value={form.date}
@@ -802,47 +1104,85 @@ function AddTxModal({ onClose, onSubmit }) {
               />
             </div>
             <div>
-              <div className="label">사용자</div>
-              <div className="row gap8">
-                {["지영", "지원"].map((u) => (
-                  <label key={u} className="chip">
-                    <input
-                      type="radio"
-                      checked={form.user === u}
-                      onChange={() => handleChange("user", u)}
-                    />
-                    {u}
-                  </label>
-                ))}
+              <div className="text-xs font-semibold text-gray-600" style={{ marginBottom: "6px" }}>
+                사용자
+              </div>
+              <div className="flex items-center gap-2">
+                <label
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    padding: "6px 10px",
+                    background: "#f0f9ff",
+                    borderRadius: 12,
+                    cursor: "pointer",
+                    fontSize: 12,
+                  }}
+                >
+                  <input type="radio" checked={form.user === "지영"} onChange={() => handleChange("user", "지영")} />
+                  지영
+                </label>
+                <label
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    padding: "6px 10px",
+                    background: "#f0f9ff",
+                    borderRadius: 12,
+                    cursor: "pointer",
+                    fontSize: 12,
+                  }}
+                >
+                  <input type="radio" checked={form.user === "지원"} onChange={() => handleChange("user", "지원")} />
+                  지원
+                </label>
               </div>
             </div>
           </div>
 
           <div>
-            <div className="label">카테고리</div>
-            <div className="row gap8">
-              <label className="chip sky">
-                <input
-                  type="radio"
-                  checked={form.category === "생활"}
-                  onChange={() => handleChange("category", "생활")}
-                />
+            <div className="text-xs font-semibold text-gray-600" style={{ marginBottom: "6px" }}>
+              카테고리
+            </div>
+            <div className="flex items-center gap-2">
+              <label
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  padding: "8px 12px",
+                  background: "#f0f9ff",
+                  borderRadius: 12,
+                  cursor: "pointer",
+                }}
+              >
+                <input type="radio" checked={form.category === "생활"} onChange={() => handleChange("category", "생활")} />
                 생활
               </label>
-              <label className="chip orange">
-                <input
-                  type="radio"
-                  checked={form.category === "외식"}
-                  onChange={() => handleChange("category", "외식")}
-                />
+              <label
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  padding: "8px 12px",
+                  background: "#ffedd5",
+                  borderRadius: 12,
+                  cursor: "pointer",
+                }}
+              >
+                <input type="radio" checked={form.category === "외식"} onChange={() => handleChange("category", "외식")} />
                 외식
               </label>
             </div>
           </div>
 
-          <div className="grid2 gap8">
+          <div className="grid grid-cols-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
             <div>
-              <div className="label">사용처</div>
+              <div className="text-xs font-semibold text-gray-600" style={{ marginBottom: "6px" }}>
+                사용처
+              </div>
               <input
                 type="text"
                 value={form.place}
@@ -852,7 +1192,9 @@ function AddTxModal({ onClose, onSubmit }) {
               />
             </div>
             <div>
-              <div className="label">구매 물건</div>
+              <div className="text-xs font-semibold text-gray-600" style={{ marginBottom: "6px" }}>
+                구매 물건
+              </div>
               <input
                 type="text"
                 value={form.item}
@@ -864,7 +1206,9 @@ function AddTxModal({ onClose, onSubmit }) {
           </div>
 
           <div>
-            <div className="label">금액(원)</div>
+            <div className="text-xs font-semibold text-gray-600" style={{ marginBottom: "6px" }}>
+              금액(원)
+            </div>
             <input
               type="number"
               min={0}
@@ -872,11 +1216,26 @@ function AddTxModal({ onClose, onSubmit }) {
               value={form.amount}
               onChange={(e) => handleChange("amount", e.target.value)}
               placeholder="10000"
-              className="input big"
+              className="input"
+              style={{ fontSize: "1rem", fontWeight: 700 }}
             />
           </div>
 
-          <button type="submit" disabled={!canSubmit} className={`button w100 ${!canSubmit ? "disabled" : ""}`}>
+          <button
+            type="submit"
+            disabled={!canSubmit}
+            className="button"
+            style={{
+              width: "100%",
+              background: canSubmit ? "linear-gradient(90deg,#38bdf8,#3b82f6)" : "#e5e7eb",
+              color: "#fff",
+              fontWeight: 700,
+              padding: "12px",
+              borderRadius: "16px",
+              boxShadow: canSubmit ? "0 6px 12px rgba(0,0,0,.08)" : "none",
+              cursor: canSubmit ? "pointer" : "not-allowed",
+            }}
+          >
             💾 저장하기
           </button>
         </form>
@@ -885,6 +1244,7 @@ function AddTxModal({ onClose, onSubmit }) {
   );
 }
 
+/* ------------------------------ 수정 모달 ------------------------------ */
 function EditTxModal({ onClose, onSubmit, initialData }) {
   const [form, setForm] = useState({
     date: initialData?.date || "",
@@ -923,17 +1283,21 @@ function EditTxModal({ onClose, onSubmit, initialData }) {
   return (
     <div className="modal-overlay">
       <div className="modal" style={{ maxWidth: 420 }}>
-        <div className="modal-head blue">
-          <div>✏️ 내역 수정</div>
+        <div className="modal-head" style={{ borderColor: "#dbeafe", background: "linear-gradient(90deg,#eff6ff,#eef2ff)" }}>
+          <div className="font-bold" style={{ color: "#1d4ed8" }}>
+            ✏️ 내역 수정
+          </div>
           <button className="iconbtn" onClick={onClose}>
             <Icon name="x" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="modal-body col gap12">
-          <div className="grid2 gap8">
+        <form onSubmit={handleSubmit} className="p-5 space-y-4 text-sm">
+          <div className="grid grid-cols-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
             <div>
-              <div className="label">날짜</div>
+              <div className="text-xs font-semibold text-gray-600" style={{ marginBottom: "6px" }}>
+                날짜
+              </div>
               <input
                 type="date"
                 value={form.date}
@@ -942,47 +1306,85 @@ function EditTxModal({ onClose, onSubmit, initialData }) {
               />
             </div>
             <div>
-              <div className="label">사용자</div>
-              <div className="row gap8">
-                {["지영", "지원"].map((u) => (
-                  <label key={u} className="chip">
-                    <input
-                      type="radio"
-                      checked={form.user === u}
-                      onChange={() => handleChange("user", u)}
-                    />
-                    {u}
-                  </label>
-                ))}
+              <div className="text-xs font-semibold text-gray-600" style={{ marginBottom: "6px" }}>
+                사용자
+              </div>
+              <div className="flex items-center gap-2">
+                <label
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    padding: "6px 10px",
+                    background: "#eff6ff",
+                    borderRadius: 12,
+                    cursor: "pointer",
+                    fontSize: 12,
+                  }}
+                >
+                  <input type="radio" checked={form.user === "지영"} onChange={() => handleChange("user", "지영")} />
+                  지영
+                </label>
+                <label
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    padding: "6px 10px",
+                    background: "#eff6ff",
+                    borderRadius: 12,
+                    cursor: "pointer",
+                    fontSize: 12,
+                  }}
+                >
+                  <input type="radio" checked={form.user === "지원"} onChange={() => handleChange("user", "지원")} />
+                  지원
+                </label>
               </div>
             </div>
           </div>
 
           <div>
-            <div className="label">카테고리</div>
-            <div className="row gap8">
-              <label className="chip sky">
-                <input
-                  type="radio"
-                  checked={form.category === "생활"}
-                  onChange={() => handleChange("category", "생활")}
-                />
+            <div className="text-xs font-semibold text-gray-600" style={{ marginBottom: "6px" }}>
+              카테고리
+            </div>
+            <div className="flex items-center gap-2">
+              <label
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  padding: "8px 12px",
+                  background: "#f0f9ff",
+                  borderRadius: 12,
+                  cursor: "pointer",
+                }}
+              >
+                <input type="radio" checked={form.category === "생활"} onChange={() => handleChange("category", "생활")} />
                 생활
               </label>
-              <label className="chip orange">
-                <input
-                  type="radio"
-                  checked={form.category === "외식"}
-                  onChange={() => handleChange("category", "외식")}
-                />
+              <label
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  padding: "8px 12px",
+                  background: "#ffedd5",
+                  borderRadius: 12,
+                  cursor: "pointer",
+                }}
+              >
+                <input type="radio" checked={form.category === "외식"} onChange={() => handleChange("category", "외식")} />
                 외식
               </label>
             </div>
           </div>
 
-          <div className="grid2 gap8">
+          <div className="grid grid-cols-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
             <div>
-              <div className="label">사용처</div>
+              <div className="text-xs font-semibold text-gray-600" style={{ marginBottom: "6px" }}>
+                사용처
+              </div>
               <input
                 type="text"
                 value={form.place}
@@ -992,7 +1394,9 @@ function EditTxModal({ onClose, onSubmit, initialData }) {
               />
             </div>
             <div>
-              <div className="label">구매 물건</div>
+              <div className="text-xs font-semibold text-gray-600" style={{ marginBottom: "6px" }}>
+                구매 물건
+              </div>
               <input
                 type="text"
                 value={form.item}
@@ -1004,7 +1408,9 @@ function EditTxModal({ onClose, onSubmit, initialData }) {
           </div>
 
           <div>
-            <div className="label">금액(원)</div>
+            <div className="text-xs font-semibold text-gray-600" style={{ marginBottom: "6px" }}>
+              금액(원)
+            </div>
             <input
               type="number"
               min={0}
@@ -1012,11 +1418,26 @@ function EditTxModal({ onClose, onSubmit, initialData }) {
               value={form.amount}
               onChange={(e) => handleChange("amount", e.target.value)}
               placeholder="10000"
-              className="input big"
+              className="input"
+              style={{ fontSize: "1rem", fontWeight: 700 }}
             />
           </div>
 
-          <button type="submit" disabled={!canSubmit} className={`button w100 ${!canSubmit ? "disabled" : ""}`}>
+          <button
+            type="submit"
+            disabled={!canSubmit}
+            className="button"
+            style={{
+              width: "100%",
+              background: canSubmit ? "linear-gradient(90deg,#60a5fa,#4f46e5)" : "#e5e7eb",
+              color: "#fff",
+              fontWeight: 700,
+              padding: "12px",
+              borderRadius: "16px",
+              boxShadow: canSubmit ? "0 6px 12px rgba(0,0,0,.08)" : "none",
+              cursor: canSubmit ? "pointer" : "not-allowed",
+            }}
+          >
             💾 수정하기
           </button>
         </form>
