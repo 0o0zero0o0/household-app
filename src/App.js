@@ -1,3 +1,4 @@
+// src/App.js
 import React, { useMemo, useState, useEffect } from "react";
 import { db } from "./firebase";
 import {
@@ -335,6 +336,7 @@ function ActionCard({ icon, text, onClick }) {
 /* ------------------------------ 달력 모달 ------------------------------ */
 function CalendarModal({ onClose, tx }) {
   const today = new Date();
+  the_selected_fix: null; /* noop to avoid eslint unused label */
   const [cursor, setCursor] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
   const [selected, setSelected] = useState(formatDate(today));
   const { year, month, grid } = useMemo(() => buildMonthGrid(cursor), [cursor]);
@@ -392,9 +394,41 @@ function CalendarModal({ onClose, tx }) {
             <div className="font-bold" style={{color:"#0369a1", marginBottom:"8px"}}>
               {selected.replaceAll("-", ".")} 사용 내역
             </div>
+            {/* ✅ 빠졌던 컴포넌트 추가 */}
             <DateBreakdown selected={selected} tx={tx} />
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+/* ✅ DateBreakdown 컴포넌트 추가 */
+function DateBreakdown({ selected, tx }) {
+  const filtered = tx.filter((t) => String(t.date) === selected);
+  const totalBy = filtered.reduce(
+    (acc, t) => {
+      const amt = Number(t.amount) || 0;
+      acc.total += amt;
+      acc.byUser[t.user] = (acc.byUser[t.user] || 0) + amt;
+      return acc;
+    },
+    { total: 0, byUser: { 지영: 0, 지원: 0 } }
+  );
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between">
+        <span className="text-sky-600 font-semibold">지영</span>
+        <span className="font-bold">₩{totalBy.byUser.지영.toLocaleString("ko-KR")}</span>
+      </div>
+      <div className="flex items-center justify-between">
+        <span className="text-sky-600 font-semibold">지원</span>
+        <span className="font-bold">₩{totalBy.byUser.지원.toLocaleString("ko-KR")}</span>
+      </div>
+      <div className="flex items-center justify-between" style={{fontWeight:800, fontSize:"1rem", paddingTop:"8px", borderTop:"2px solid #bae6fd"}}>
+        <span>합계</span>
+        <span style={{color:"#0284c7"}}>₩{totalBy.total.toLocaleString("ko-KR")}</span>
       </div>
     </div>
   );
